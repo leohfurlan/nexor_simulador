@@ -13,7 +13,7 @@ pydantic-settings>=2.2
 # --- Banco ---
 SQLAlchemy>=2.0
 aiosqlite>=0.20              # dev standalone (SQLite async)
-# asyncpg>=0.29              # produção (Postgres) — já presente no Nexor Fiscal
+asyncpg>=0.29               # Postgres async — integração read-only com o Nexor Fiscal
 alembic>=1.13               # migrations (integração)
 
 # --- Import de planilhas (Fase 3) ---

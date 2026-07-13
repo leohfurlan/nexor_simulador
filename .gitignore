@@ -5,6 +5,9 @@ __pycache__/
 venv/
 *.db
 .env
+/build/
+/dist/
+/release/
 
 # Planilhas reais de clientes (dados sensíveis) — nunca versionar.
 # Os exemplos fictícios em app/static/examples/ NÃO são atingidos (não estão na raiz).

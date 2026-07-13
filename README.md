@@ -69,11 +69,36 @@ isolamento de produção.
 - Dependências de `requirements.txt`.
 - `openpyxl` para importar arquivos `.xlsx`, `.xlsm` ou `.xls`.
 
-Observação: o código atual importa `openpyxl`, mas a dependência está comentada
-em `requirements.txt`. Em um ambiente limpo, instale-a explicitamente até que a
-declaração de dependências seja corrigida.
+`openpyxl` está declarado em `requirements.txt`; não é necessária instalação
+manual extra para importar `.xlsx`.
 
 ## Execução local
+
+### Instalador para usuário final (recomendado)
+
+O arquivo `release\Instalar_Nexor_Simulador.exe` instala uma versão autocontida
+no Windows. O computador do usuário não precisa ter Python, Git ou dependências
+de desenvolvimento.
+
+O instalador:
+
+- instala por usuário, sem exigir privilégios administrativos;
+- cria atalhos no Menu Iniciar e, opcionalmente, na Área de Trabalho;
+- abre o navegador automaticamente;
+- oferece uma janela de controle para reabrir ou encerrar o servidor;
+- mantém banco e logs em `%LOCALAPPDATA%\NexorSimulador`, preservando os dados
+  durante reinstalações e atualizações.
+
+Para gerar o instalador em uma máquina de desenvolvimento Windows:
+
+```powershell
+python -m pip install -r requirements-build.txt
+powershell -ExecutionPolicy Bypass -File .\scripts\build_installer.ps1
+```
+
+O build requer PyInstaller 6 e Inno Setup 6. O executável produzido não possui
+assinatura digital; o Windows SmartScreen poderá exibir um aviso até que um
+certificado de assinatura de código seja configurado.
 
 ### Inicialização por duplo clique (Windows)
 
@@ -169,8 +194,8 @@ Foram observados dois avisos não bloqueantes: depreciação do uso atual de
 ## Limitações conhecidas
 
 - Não há login, autorização, CSRF ou tenant derivado de usuário autenticado.
-- Não existe o diretório `migrations/` referenciado por `alembic.ini`.
-- A compatibilidade com PostgreSQL/`asyncpg` ainda não foi validada.
+- As migrações Alembic existem (`migrations/`, revisão `0001_initial_sim`,
+  validada em SQLite); a execução em PostgreSQL/`asyncpg` ainda não foi validada.
 - Tailwind, HTMX e Chart.js são carregados de CDNs; não há bundle de produção.
 - Não há health check, observabilidade, CI/CD, container ou configuração de
   deploy.

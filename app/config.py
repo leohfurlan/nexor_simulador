@@ -18,9 +18,15 @@ class Settings(BaseSettings):
     # Log de SQL (echo). Separado do debug para não poluir dev/testes por padrão.
     sql_echo: bool = False
 
-    # Tenant fixo para desenvolvimento standalone. Na integração, o tenant vem
-    # do JWT via get_current_tenant (ver app/deps.py — seam de integração).
-    dev_tenant_id: uuid.UUID = uuid.UUID("00000000-0000-0000-0000-000000000001")
+    # Tenant do escritório (JS APOIO CONTABIL). Usado tanto para escopo dos dados
+    # do simulador quanto para ler a base do Nexor Fiscal. Na integração, virá do JWT.
+    dev_tenant_id: uuid.UUID = uuid.UUID("8b5dbf59-dd85-4c63-9e94-0f792309b10b")
+
+    # Conexão READ-ONLY à base do Nexor Fiscal (nfse_hub) para exibir/importar
+    # clientes e notas. Vazio = feature desativada. Fica no .env (gitignored).
+    nexor_fiscal_database_url: str = ""
+    # Histórico de notas a partir deste ano (PRD desta integração: 2025).
+    nexor_fiscal_desde_ano: int = 2025
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

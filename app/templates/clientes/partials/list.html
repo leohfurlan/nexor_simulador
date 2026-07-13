@@ -1,0 +1,52 @@
+<input type="hidden" name="sort" value="{{ sort }}" />
+{% if not clientes %}
+<p class="p-8 text-center text-sm text-slate-500">
+  Nenhum cliente{% if q %} para “{{ q }}”{% endif %}.
+</p>
+{% else %}
+{% set th = 'px-4 py-3 text-xs font-medium uppercase tracking-wide hover:text-slate-700' %}
+<div class="overflow-x-auto">
+  <table class="w-full min-w-[720px] text-sm">
+    <thead>
+      <tr class="border-b border-slate-100 text-left text-slate-400">
+        <th class="px-4 py-3">
+          <button hx-get="/clientes?sort=nome" hx-target="#cliente-list" hx-swap="innerHTML" hx-include="[name='q']"
+                  class="{{ th }} {{ 'text-slate-900' if sort == 'nome' else '' }}">Cliente {{ '↓' if sort == 'nome' else '' }}</button>
+        </th>
+        <th class="{{ th }}">Regime</th>
+        <th class="px-4 py-3 text-right">
+          <button hx-get="/clientes?sort=emitidas_valor" hx-target="#cliente-list" hx-swap="innerHTML" hx-include="[name='q']"
+                  class="{{ th }} {{ 'text-slate-900' if sort == 'emitidas_valor' else '' }}">Emitidas {{ '↓' if sort == 'emitidas_valor' else '' }}</button>
+        </th>
+        <th class="px-4 py-3 text-right">
+          <button hx-get="/clientes?sort=recebidas_valor" hx-target="#cliente-list" hx-swap="innerHTML" hx-include="[name='q']"
+                  class="{{ th }} {{ 'text-slate-900' if sort == 'recebidas_valor' else '' }}">Recebidas {{ '↓' if sort == 'recebidas_valor' else '' }}</button>
+        </th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in clientes %}
+      <tr class="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+        <td class="px-4 py-3">
+          <a href="/clientes/{{ c.cnpj_id }}" class="font-medium text-slate-900 hover:underline">{{ c.razao_social }}</a>
+          <p class="text-xs text-slate-400">{{ c.cnpj }}{% if c.status and c.status != 'active' %} · {{ c.status }}{% endif %}</p>
+        </td>
+        <td class="px-4 py-3 text-slate-600">{{ c.regime_tributario or '—' }}</td>
+        <td class="px-4 py-3 text-right tabular-nums">
+          <span class="font-medium text-slate-800">{{ c.n_emitidas }}</span>
+          <span class="block text-xs text-slate-400">R$ {{ c.v_emitidas | brl }}</span>
+        </td>
+        <td class="px-4 py-3 text-right tabular-nums">
+          <span class="font-medium text-slate-800">{{ c.n_recebidas }}</span>
+          <span class="block text-xs text-slate-400">R$ {{ c.v_recebidas | brl }}</span>
+        </td>
+        <td class="px-4 py-3 text-right">
+          <a href="/clientes/{{ c.cnpj_id }}" class="text-sm font-medium text-slate-700 hover:underline">Ver →</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}

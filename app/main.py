@@ -13,7 +13,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
-from app.routers import configuracoes, dashboard, empresas, referencia
+from app.routers import clientes, configuracoes, dashboard, empresas, referencia
 from app.seeds import init_models, seed_all
 
 
@@ -36,6 +36,7 @@ app = FastAPI(
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+app.include_router(clientes.router)
 app.include_router(empresas.router)
 app.include_router(dashboard.router)
 app.include_router(referencia.router)

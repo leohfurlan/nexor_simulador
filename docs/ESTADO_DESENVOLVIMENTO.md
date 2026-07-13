@@ -8,6 +8,13 @@
 
 **Produção:** não recomendado no estado atual
 
+> **Atualização pós-Fase 6:** as migrações Alembic foram criadas e validadas em
+> SQLite (`migrations/` com a revisão `0001_initial_sim`, que cria as tabelas
+> `sim_*` e semeia as 13 categorias) e `openpyxl` passou a ser declarado em
+> `requirements.txt`. Com isso, os itens "Migrações Alembic" e "Importação Excel"
+> da tabela abaixo saem de Pendente/Parcial para **Concluído** (execução em
+> PostgreSQL ainda pendente). Guia de integração em [../INTEGRATION.md](../INTEGRATION.md).
+
 ## Resumo executivo
 
 O núcleo de negócio e o fluxo principal estão implementados e executáveis. O
