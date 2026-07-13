@@ -1,0 +1,26 @@
+"""Parâmetros configuráveis do comparador de regimes (PRD seção 4).
+
+Estes são os valores padrão. Na aplicação completa eles vêm da tabela
+`Parametros` (tela de Configurações) e são convertidos para esta dataclass
+antes de entrar no motor de cálculo — assim o motor permanece puro e nenhum
+número fica "mágico" no código.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+from decimal import Decimal
+
+
+@dataclass(frozen=True)
+class Parametros:
+    # Alíquotas (frações: 0.027 == 2,7%)
+    aliquota_cbs: Decimal = Decimal("0.027")            # CBS destacada
+    aliquota_ibs: Decimal = Decimal("0.088")            # IBS destacada
+    aliquota_hibrido_total: Decimal = Decimal("0.163")  # Imposto bruto SN Híbrido
+    aliquota_credito_despesa: Decimal = Decimal("0.27")  # Crédito gerado por despesas
+    aliquota_lucro_presumido: Decimal = Decimal("0.1655")  # IRPJ+CSLL+IBS/CBS
+
+    # Honorários mensais (R$)
+    honorario_hibrido: Decimal = Decimal("550")
+    honorario_padrao: Decimal = Decimal("350")
+    honorario_lucro_presumido: Decimal = Decimal("750")

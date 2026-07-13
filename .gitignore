@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.db
+.env
+
+# Planilhas reais de clientes (dados sensíveis) — nunca versionar.
+# Os exemplos fictícios em app/static/examples/ NÃO são atingidos (não estão na raiz).
+/*.xlsx
+/*.xls
+CLIENTES*.xlsx

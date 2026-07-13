@@ -1,0 +1,23 @@
+{% if empresas %}
+<ul class="divide-y divide-slate-100">
+  {% for e in empresas %}
+  <li class="flex items-center justify-between gap-4 py-3">
+    <a href="/empresas/{{ e.id }}" class="min-w-0 flex-1 hover:opacity-80">
+      <p class="truncate text-sm font-medium text-slate-900">{{ e.nome }}</p>
+      <p class="truncate text-xs text-slate-500">
+        {{ e.cnpj or 'sem CNPJ' }} · {{ e.atividade or 'sem atividade' }}
+        {% if e.exige_credito_cliente %}
+        <span class="ml-1 rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">exige crédito</span>
+        {% endif %}
+      </p>
+    </a>
+    <form method="post" action="/empresas/{{ e.id }}/excluir"
+          onsubmit="return confirm('Excluir a empresa {{ e.nome }}? Os lançamentos serão removidos.')">
+      <button class="text-sm font-medium text-rose-600 hover:underline">Excluir</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="py-8 text-center text-sm text-slate-500">Nenhuma empresa encontrada.</p>
+{% endif %}

@@ -1,0 +1,68 @@
+<section id="lancamentos-section" class="rounded-xl border border-slate-200 bg-white p-6">
+  <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Lançamentos mensais</h2>
+  <p class="mt-1 text-xs text-slate-400">
+    Preencha faturamento, despesas com crédito e o DAS Padrão apurado. Os 4 regimes
+    são recalculados ao salvar; o mais vantajoso fica destacado.
+  </p>
+
+  {% if mensagem %}
+  <p class="mt-3 rounded-md bg-emerald-50 px-4 py-2 text-sm text-emerald-700">{{ mensagem }}</p>
+  {% endif %}
+  {% if erros %}
+  <div class="mt-3 rounded-md bg-rose-50 px-4 py-2 text-sm text-rose-700">
+    <ul class="list-inside list-disc">{% for e in erros %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <div class="mt-4 overflow-x-auto">
+    <table class="w-full min-w-[820px] border-collapse text-sm">
+      <thead>
+        <tr class="text-left text-xs uppercase tracking-wide text-slate-400">
+          <th class="px-3 py-2 font-medium">Competência</th>
+          <th class="px-3 py-2 font-medium">Faturamento</th>
+          <th class="px-3 py-2 font-medium">Despesas c/ crédito</th>
+          <th class="px-3 py-2 font-medium">DAS Padrão</th>
+          <th class="px-3 py-2 text-right font-medium">SN Padrão</th>
+          <th class="px-3 py-2 text-right font-medium">SN Híbrido</th>
+          <th class="px-3 py-2 text-right font-medium">LP</th>
+          <th class="px-3 py-2 text-right font-medium">LP + crédito</th>
+          <th class="px-3 py-2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}{% include "empresas/partials/lancamento_row.html" %}{% endfor %}
+
+        <!-- Nova competência -->
+        <tr class="border-t border-slate-200 bg-slate-50">
+          <td class="px-3 py-2"><input type="month" name="competencia" class="w-32 rounded border border-slate-300 px-2 py-1 text-sm" /></td>
+          <td class="px-3 py-2"><input type="number" step="0.01" min="0" name="faturamento" placeholder="0,00" class="w-28 rounded border border-slate-300 px-2 py-1 text-sm" /></td>
+          <td class="px-3 py-2"><input type="number" step="0.01" min="0" name="despesas_com_credito" placeholder="0,00" class="w-28 rounded border border-slate-300 px-2 py-1 text-sm" /></td>
+          <td class="px-3 py-2"><input type="number" step="0.01" min="0" name="das_padrao_apurado" placeholder="—" class="w-28 rounded border border-slate-300 px-2 py-1 text-sm" /></td>
+          <td class="px-3 py-2 text-right text-xs text-slate-400" colspan="4">preencha e adicione →</td>
+          <td class="px-3 py-2 text-right">
+            <button hx-post="/empresas/{{ empresa.id }}/lancamentos" hx-include="closest tr"
+                    hx-target="#lancamentos-section" hx-swap="outerHTML"
+                    class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700">Adicionar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  {% if not rows %}
+  <p class="mt-3 text-sm text-slate-500">Nenhum lançamento ainda. Adicione a primeira competência acima ou importe um CSV.</p>
+  {% endif %}
+
+  <!-- Import CSV / XLSX -->
+  <form class="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4"
+        hx-post="/empresas/{{ empresa.id }}/importar" hx-target="#lancamentos-section"
+        hx-swap="outerHTML" hx-encoding="multipart/form-data">
+    <input type="file" name="arquivo" accept=".csv,.xlsx,.xls" required class="text-sm" />
+    <button class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Importar planilha</button>
+    <span class="text-xs text-slate-400">
+      CSV ou Excel — colunas: Mês, Faturamento Mensal, Despesas com Crédito, DAS Padrão.
+      <a href="/static/examples/lancamentos_exemplo.csv" class="text-slate-600 underline" download>exemplo .csv</a> ·
+      <a href="/static/examples/lancamentos_exemplo.xlsx" class="text-slate-600 underline" download>exemplo .xlsx</a>
+    </span>
+  </form>
+</section>

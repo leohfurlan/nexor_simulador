@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Nexor Simulador{% endblock %}
+
+{% block content %}
+<header class="mb-6">
+  <h1 class="text-2xl font-semibold text-slate-900">Dashboard</h1>
+  <p class="mt-1 text-sm text-slate-500">Escolha uma empresa para ver a comparação de regimes.</p>
+</header>
+
+{% if empresas %}
+<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+  {% for e in empresas %}
+  <a href="/dashboard/{{ e.id }}"
+     class="rounded-xl border border-slate-200 bg-white p-5 hover:border-slate-400 hover:shadow-sm">
+    <p class="font-medium text-slate-900">{{ e.nome }}</p>
+    <p class="mt-1 text-xs text-slate-500">
+      {{ e.cnpj or 'sem CNPJ' }}
+      {% if e.exige_credito_cliente %}· <span class="text-amber-700">exige crédito</span>{% endif %}
+    </p>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<p class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+  Nenhuma empresa cadastrada. <a href="/empresas" class="font-medium text-slate-900 underline">Cadastrar empresa</a>.
+</p>
+{% endif %}
+{% endblock %}

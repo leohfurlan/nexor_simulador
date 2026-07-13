@@ -1,0 +1,7 @@
+# Configuracao opcional de atualizacao automatica.
+#
+# URL do repositorio usada para o primeiro clone e para as atualizacoes.
+https://github.com/leohfurlan/nexor_simulador.git
+#
+# Se a URL for removida, ABRIR_SIMULADOR.bat usara somente a copia local
+# enviada junto com o inicializador.

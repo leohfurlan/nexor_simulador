@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Configurações · Nexor Simulador{% endblock %}
+
+{% block content %}
+<header class="mb-6">
+  <h1 class="text-2xl font-semibold text-slate-900">Configurações</h1>
+  <p class="mt-1 text-sm text-slate-500">
+    Alíquotas e honorários usados em todos os cálculos. Nada é fixo no código —
+    tudo vem daqui.
+  </p>
+</header>
+
+<form hx-post="/configuracoes" hx-target="#resultado" hx-swap="innerHTML"
+      class="space-y-8">
+
+  <!-- Alíquotas -->
+  <section class="rounded-xl border border-slate-200 bg-white p-6">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Alíquotas (%)</h2>
+    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {% set aliq = [
+        ('aliquota_cbs', 'CBS destacada', 'Contribuição sobre Bens e Serviços destacada na nota.'),
+        ('aliquota_ibs', 'IBS destacada', 'Imposto sobre Bens e Serviços destacado na nota.'),
+        ('aliquota_hibrido_total', 'SN Híbrido (bruto)', 'Imposto bruto do Simples Nacional Híbrido.'),
+        ('aliquota_credito_despesa', 'Crédito sobre despesas', 'Percentual de crédito gerado pelas despesas.'),
+        ('aliquota_lucro_presumido', 'Lucro Presumido', 'IRPJ + CSLL + IBS/CBS do Lucro Presumido.'),
+      ] %}
+      {% for campo, rotulo, ajuda in aliq %}
+      <label class="block">
+        <span class="text-sm font-medium text-slate-700">{{ rotulo }}</span>
+        <span class="block text-xs text-slate-400">{{ ajuda }}</span>
+        <div class="mt-1 flex items-center">
+          <input type="number" step="0.01" min="0" name="{{ campo }}" required
+                 value="{{ '%.2f'|format(valores[campo]) }}"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+          <span class="ml-2 text-sm text-slate-400">%</span>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Honorários -->
+  <section class="rounded-xl border border-slate-200 bg-white p-6">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Honorários mensais (R$)</h2>
+    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {% set hon = [
+        ('honorario_hibrido', 'SN Híbrido'),
+        ('honorario_padrao', 'SN Padrão'),
+        ('honorario_lucro_presumido', 'Lucro Presumido'),
+      ] %}
+      {% for campo, rotulo in hon %}
+      <label class="block">
+        <span class="text-sm font-medium text-slate-700">{{ rotulo }}</span>
+        <div class="mt-1 flex items-center">
+          <span class="mr-2 text-sm text-slate-400">R$</span>
+          <input type="number" step="0.01" min="0" name="{{ campo }}" required
+                 value="{{ '%.2f'|format(valores[campo]) }}"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="flex items-center gap-4">
+    <button type="submit"
+            class="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700">
+      Salvar configurações
+    </button>
+    <div id="resultado" aria-live="polite"></div>
+  </div>
+</form>
+{% endblock %}

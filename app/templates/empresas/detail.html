@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ empresa.nome }} · Nexor Simulador{% endblock %}
+
+{% block content %}
+<a href="/empresas" class="text-sm text-slate-500 hover:underline">← Empresas</a>
+
+<header class="mb-6 mt-2 flex items-start justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900">{{ empresa.nome }}</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      {{ empresa.cnpj or 'sem CNPJ' }} · {{ empresa.atividade or 'sem atividade' }}
+      {% if empresa.exige_credito_cliente %}
+      <span class="ml-1 rounded bg-amber-50 px-1.5 py-0.5 text-xs text-amber-700">exige crédito de IBS/CBS</span>
+      {% endif %}
+    </p>
+  </div>
+</header>
+
+<details class="mb-6 rounded-xl border border-slate-200 bg-white p-6">
+  <summary class="cursor-pointer text-sm font-semibold text-slate-900">Editar dados da empresa</summary>
+  <form method="post" action="/empresas/{{ empresa.id }}/editar" class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <label class="block sm:col-span-2">
+      <span class="text-sm font-medium text-slate-700">Nome *</span>
+      <input name="nome" required value="{{ empresa.nome }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+    </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">CNPJ</span>
+      <input name="cnpj" value="{{ empresa.cnpj or '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+    </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Atividade</span>
+      <input name="atividade" value="{{ empresa.atividade or '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+    </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Regime atual</span>
+      <select name="regime_atual" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
+        <option value="">— não informado —</option>
+        {% for chave, rotulo in regimes %}
+        <option value="{{ chave }}" {{ 'selected' if empresa.regime_atual == chave else '' }}>{{ rotulo }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="flex items-center gap-2 sm:col-span-2">
+      <input type="checkbox" name="exige_credito_cliente" value="1" {{ 'checked' if empresa.exige_credito_cliente else '' }} class="h-4 w-4 rounded border-slate-300" />
+      <span class="text-sm text-slate-700">O cliente exige crédito de IBS/CBS (B2B)</span>
+    </label>
+    <div class="sm:col-span-2">
+      <button type="submit" class="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700">Salvar dados</button>
+    </div>
+  </form>
+</details>
+
+{% include "empresas/partials/lancamentos_section.html" %}
+{% endblock %}

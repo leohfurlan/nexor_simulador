@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Empresas · Nexor Simulador{% endblock %}
+
+{% block content %}
+<header class="mb-6 flex items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900">Empresas</h1>
+    <p class="mt-1 text-sm text-slate-500">Cadastre a empresa e lance os dados mês a mês.</p>
+  </div>
+</header>
+
+{% if erro %}
+<p class="mb-4 rounded-md bg-rose-50 px-4 py-2 text-sm text-rose-700">{{ erro }}</p>
+{% endif %}
+
+<details class="mb-6 rounded-xl border border-slate-200 bg-white p-6" {% if erro %}open{% endif %}>
+  <summary class="cursor-pointer text-sm font-semibold text-slate-900">+ Nova empresa</summary>
+  <form method="post" action="/empresas" class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <label class="block sm:col-span-2">
+      <span class="text-sm font-medium text-slate-700">Nome *</span>
+      <input name="nome" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+    </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">CNPJ</span>
+      <input name="cnpj" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+    </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Atividade</span>
+      <input name="atividade" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+    </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Regime atual</span>
+      <select name="regime_atual" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
+        <option value="">— não informado —</option>
+        {% for chave, rotulo in regimes %}<option value="{{ chave }}">{{ rotulo }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="flex items-center gap-2 sm:col-span-2">
+      <input type="checkbox" name="exige_credito_cliente" value="1" class="h-4 w-4 rounded border-slate-300" />
+      <span class="text-sm text-slate-700">O cliente exige crédito de IBS/CBS (B2B)</span>
+    </label>
+    <div class="sm:col-span-2">
+      <button type="submit" class="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700">Cadastrar</button>
+    </div>
+  </form>
+</details>
+
+<div class="rounded-xl border border-slate-200 bg-white">
+  <div class="border-b border-slate-100 p-3">
+    <input name="q" value="{{ q }}" placeholder="Buscar por nome ou CNPJ…"
+           hx-get="/empresas" hx-trigger="input changed delay:300ms" hx-target="#empresa-list" hx-swap="innerHTML"
+           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+  </div>
+  <div id="empresa-list" class="px-4">
+    {% include "empresas/partials/list_items.html" %}
+  </div>
+</div>
+{% endblock %}

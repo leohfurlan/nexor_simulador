@@ -1,0 +1,23 @@
+NEXOR - SIMULADOR TRIBUTARIO
+============================
+
+COMO ABRIR
+
+1. Extraia todo o arquivo ZIP para uma pasta do computador.
+2. Clique duas vezes em ABRIR_SIMULADOR.bat.
+3. Na primeira abertura, aguarde a instalacao dos componentes.
+4. O navegador abrira automaticamente na pagina inicial.
+
+IMPORTANTE
+
+- E necessario ter Python 3 instalado.
+- Para atualizacao automatica pelo repositorio, tambem e necessario ter Git.
+- A primeira abertura precisa de conexao com a internet.
+- Mantenha a janela preta/azul do inicializador aberta durante o uso.
+- Para encerrar o sistema, feche a janela do inicializador ou pressione Ctrl+C.
+- Nao mova somente o arquivo ABRIR_SIMULADOR.bat. Mantenha todos os arquivos e
+  pastas do pacote juntos.
+
+SE APARECER UM ERRO
+
+Fotografe a mensagem exibida na janela e envie ao responsavel pelo Nexor.
