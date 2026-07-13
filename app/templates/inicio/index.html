@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Início · Nexor Simulador{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+  <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Reforma Tributária · IBS/CBS</p>
+  <h1 class="mt-1 text-2xl font-semibold text-slate-900">Simulador Tributário do Nexor Fiscal</h1>
+  <p class="mt-2 max-w-2xl text-sm text-slate-600">
+    Esta ferramenta compara, mês a mês e no acumulado, quatro cenários tributários para
+    cada empresa e indica o de <strong>menor custo total</strong> — somando imposto e
+    honorários e considerando a necessidade de crédito de IBS/CBS para clientes B2B.
+    Use a base já existente do Nexor Fiscal ou cadastre uma nova empresa manualmente.
+  </p>
+</header>
+
+<!-- Os 4 cenários -->
+<section class="mb-8">
+  <h2 class="mb-3 text-sm font-semibold text-slate-900">Os quatro cenários comparados</h2>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div class="rounded-xl border border-slate-200 bg-white p-4" style="border-top: 3px solid #2a78d6">
+      <p class="text-sm font-semibold text-slate-900">Simples Nacional Padrão</p>
+      <p class="mt-1 text-xs text-slate-500">DAS apurado normalmente, sem geração de crédito de IBS/CBS ao cliente.</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4" style="border-top: 3px solid #4a3aa7">
+      <p class="text-sm font-semibold text-slate-900">Simples Nacional Híbrido</p>
+      <p class="mt-1 text-xs text-slate-500">Recolhimento de IBS/CBS por fora, permitindo repassar crédito ao cliente.</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4" style="border-top: 3px solid #2a78d6">
+      <p class="text-sm font-semibold text-slate-900">Lucro Presumido</p>
+      <p class="mt-1 text-xs text-slate-500">Apuração pelo Lucro Presumido, sem aproveitamento de crédito nas despesas.</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-4" style="border-top: 3px solid #4a3aa7">
+      <p class="text-sm font-semibold text-slate-900">Lucro Presumido c/ crédito IBS/CBS</p>
+      <p class="mt-1 text-xs text-slate-500">Lucro Presumido descontando o crédito das despesas elegíveis.</p>
+    </div>
+  </div>
+  <p class="mt-3 text-xs text-slate-400">
+    Quando o cliente é B2B e <strong>exige crédito</strong>, o Simples Nacional Padrão é
+    excluído automaticamente da recomendação acumulada.
+  </p>
+</section>
+
+<!-- Como funciona: dois caminhos -->
+<section class="mb-8">
+  <h2 class="mb-3 text-sm font-semibold text-slate-900">Como começar — escolha um caminho</h2>
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
+    <!-- Caminho A: base do Nexor Fiscal -->
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
+      <div class="flex items-center gap-2">
+        <span class="grid h-6 w-6 place-items-center rounded-full bg-slate-900 text-xs font-bold text-white">A</span>
+        <p class="text-sm font-semibold text-slate-900">Usar a base do Nexor Fiscal</p>
+      </div>
+      <p class="mt-2 text-xs text-slate-500">
+        Para clientes que já emitem/recebem notas no Nexor Fiscal — o faturamento vem pronto.
+      </p>
+      <ol class="mt-3 space-y-2 text-sm text-slate-700">
+        <li><span class="mr-1 font-semibold text-slate-400">1.</span> Abra <a href="/clientes" class="font-medium text-slate-900 underline">Clientes (Nexor Fiscal)</a> e localize o cliente pela razão social ou CNPJ.</li>
+        <li><span class="mr-1 font-semibold text-slate-400">2.</span> Entre no cliente para ver o histórico de notas e o faturamento mensal.</li>
+        <li><span class="mr-1 font-semibold text-slate-400">3.</span> Clique em <strong>Importar para o simulador</strong>: cria a empresa e traz o faturamento mês a mês.</li>
+        <li><span class="mr-1 font-semibold text-slate-400">4.</span> Complete as despesas com crédito e o DAS apurado, e veja o <strong>Dashboard</strong>.</li>
+      </ol>
+      {% if not configurado %}
+      <p class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        Integração ainda não configurada. Defina <code>NEXOR_FISCAL_DATABASE_URL</code> no
+        <code>.env</code> para listar os clientes. Sem isso, use o Caminho B.
+      </p>
+      {% endif %}
+    </div>
+
+    <!-- Caminho B: cadastro manual -->
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
+      <div class="flex items-center gap-2">
+        <span class="grid h-6 w-6 place-items-center rounded-full bg-slate-900 text-xs font-bold text-white">B</span>
+        <p class="text-sm font-semibold text-slate-900">Cadastrar uma nova empresa</p>
+      </div>
+      <p class="mt-2 text-xs text-slate-500">
+        Para empresas fora do Nexor Fiscal ou simulações avulsas — você informa os dados.
+      </p>
+      <ol class="mt-3 space-y-2 text-sm text-slate-700">
+        <li><span class="mr-1 font-semibold text-slate-400">1.</span> Abra <a href="/empresas" class="font-medium text-slate-900 underline">Empresas</a> e clique em <strong>+ Nova empresa</strong>.</li>
+        <li><span class="mr-1 font-semibold text-slate-400">2.</span> Preencha nome, CNPJ, atividade, regime atual e se o cliente <strong>exige crédito</strong> (B2B).</li>
+        <li><span class="mr-1 font-semibold text-slate-400">3.</span> Lance os dados mês a mês na tabela ou <strong>importe um CSV/XLSX</strong>.</li>
+        <li><span class="mr-1 font-semibold text-slate-400">4.</span> Abra o <a href="/dashboard" class="font-medium text-slate-900 underline">Dashboard</a> e escolha a empresa para ver a comparação.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- Como preencher os lançamentos -->
+<section class="mb-8">
+  <h2 class="mb-3 text-sm font-semibold text-slate-900">O que preencher em cada mês</h2>
+  <div class="rounded-xl border border-slate-200 bg-white">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[560px] text-sm">
+        <thead>
+          <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-400">
+            <th class="px-4 py-3 font-medium">Campo</th>
+            <th class="px-4 py-3 font-medium">O que informar</th>
+            <th class="px-4 py-3 font-medium">Obrigatório?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-slate-50">
+            <td class="px-4 py-3 font-medium text-slate-800">Competência</td>
+            <td class="px-4 py-3 text-slate-500">Mês de referência (ex.: <code>2026-01</code>, <code>01/2026</code> ou <code>jan/2026</code>).</td>
+            <td class="px-4 py-3 text-emerald-700">Sim</td>
+          </tr>
+          <tr class="border-b border-slate-50">
+            <td class="px-4 py-3 font-medium text-slate-800">Faturamento</td>
+            <td class="px-4 py-3 text-slate-500">Receita bruta do mês. Vem preenchido quando importado do Nexor Fiscal.</td>
+            <td class="px-4 py-3 text-emerald-700">Sim</td>
+          </tr>
+          <tr class="border-b border-slate-50">
+            <td class="px-4 py-3 font-medium text-slate-800">Despesas com crédito</td>
+            <td class="px-4 py-3 text-slate-500">Despesas que geram crédito de IBS/CBS. Consulte a <a href="/referencia" class="text-slate-700 underline">Referência de créditos</a>.</td>
+            <td class="px-4 py-3 text-slate-400">Opcional</td>
+          </tr>
+          <tr class="border-b border-slate-50">
+            <td class="px-4 py-3 font-medium text-slate-800">DAS apurado</td>
+            <td class="px-4 py-3 text-slate-500">Valor real do DAS do Simples Padrão no mês. Necessário para incluir o SN Padrão no acumulado.</td>
+            <td class="px-4 py-3 text-slate-400">Opcional</td>
+          </tr>
+          <tr class="last:border-0">
+            <td class="px-4 py-3 font-medium text-slate-800">RBT12</td>
+            <td class="px-4 py-3 text-slate-500">Faturamento acumulado dos últimos 12 meses, quando quiser refinar a faixa do Simples.</td>
+            <td class="px-4 py-3 text-slate-400">Opcional</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="mt-3 space-y-2 text-xs text-slate-500">
+    <p>
+      <strong>Importação em massa:</strong> aceita CSV (UTF-8, separador <code>,</code> ou <code>;</code>)
+      e Excel (<code>.xlsx</code>). Os cabeçalhos aceitam variações — por exemplo
+      <code>competencia</code>/<code>Mês</code>, <code>faturamento</code>/<code>receita</code>,
+      <code>despesas_com_credito</code>, <code>das_padrao_apurado</code>/<code>DAS</code>.
+    </p>
+    <p>
+      <strong>Atenção:</strong> o Simples Nacional Padrão só entra na recomendação acumulada
+      quando <em>todos</em> os meses têm o DAS apurado informado. A economia anual é uma
+      projeção linear pela média dos meses cadastrados, não uma previsão fiscal completa.
+    </p>
+  </div>
+</section>
+
+<!-- Atalhos -->
+<section>
+  <h2 class="mb-3 text-sm font-semibold text-slate-900">Ir direto para</h2>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <a href="/clientes" class="rounded-xl border border-slate-200 bg-white p-4 hover:border-slate-400 hover:shadow-sm">
+      <p class="text-sm font-semibold text-slate-900">Clientes (Nexor Fiscal)</p>
+      <p class="mt-1 text-xs text-slate-500">Histórico de notas e importação para o simulador.</p>
+    </a>
+    <a href="/empresas" class="rounded-xl border border-slate-200 bg-white p-4 hover:border-slate-400 hover:shadow-sm">
+      <p class="text-sm font-semibold text-slate-900">Empresas</p>
+      <p class="mt-1 text-xs text-slate-500">Cadastro manual e lançamentos mensais.</p>
+    </a>
+    <a href="/dashboard" class="rounded-xl border border-slate-200 bg-white p-4 hover:border-slate-400 hover:shadow-sm">
+      <p class="text-sm font-semibold text-slate-900">Dashboard</p>
+      <p class="mt-1 text-xs text-slate-500">Comparação de regimes, projeção e recomendação.</p>
+    </a>
+    <a href="/referencia" class="rounded-xl border border-slate-200 bg-white p-4 hover:border-slate-400 hover:shadow-sm">
+      <p class="text-sm font-semibold text-slate-900">Referência de créditos</p>
+      <p class="mt-1 text-xs text-slate-500">Quais despesas geram crédito de IBS/CBS.</p>
+    </a>
+    <a href="/configuracoes" class="rounded-xl border border-slate-200 bg-white p-4 hover:border-slate-400 hover:shadow-sm">
+      <p class="text-sm font-semibold text-slate-900">Configurações</p>
+      <p class="mt-1 text-xs text-slate-500">Alíquotas e honorários usados nos cálculos.</p>
+    </a>
+  </div>
+</section>
+{% endblock %}

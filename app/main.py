@@ -8,13 +8,15 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
+from app.integrations import nexor_fiscal
 from app.routers import clientes, configuracoes, dashboard, empresas, referencia
 from app.seeds import init_models, seed_all
+from app.utils.templates import templates
 
 
 @asynccontextmanager
@@ -43,7 +45,11 @@ app.include_router(referencia.router)
 app.include_router(configuracoes.router)
 
 
-@app.get("/", include_in_schema=False)
-async def root():
-    # Até o dashboard existir (Fase 4), a raiz leva à lista de empresas.
-    return RedirectResponse(url="/empresas")
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def root(request: Request):
+    # Página inicial: introdução ao sistema e como começar a usar.
+    return templates.TemplateResponse(
+        request,
+        "inicio/index.html",
+        {"active": "inicio", "configurado": nexor_fiscal.is_configured()},
+    )
