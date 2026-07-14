@@ -32,6 +32,8 @@
     <button hx-post="/empresas/{{ empresa.id }}/lancamentos" hx-include="closest tr"
             hx-target="#lancamentos-section" hx-swap="outerHTML"
             class="text-sm font-medium text-slate-900 hover:underline">Salvar</button>
+    <a href="/dashboard/{{ empresa.id }}?mes={{ row.competencia }}"
+       class="ml-2 text-sm font-medium text-slate-600 hover:underline">Simular mês</a>
     <button hx-post="/empresas/{{ empresa.id }}/lancamentos/{{ row.competencia }}/excluir"
             hx-target="#lancamentos-section" hx-swap="outerHTML"
             hx-confirm="Excluir a competência {{ row.competencia | month_year_pt }}?"

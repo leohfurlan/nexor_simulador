@@ -80,6 +80,12 @@ async def build_dashboard(
         and tem_das
         and all(r["das"] is not None for r in meses_com_movimento)
     )
+    # Quando só ALGUNS meses têm o DAS informado (uso típico do contador: lança o
+    # DAS de um mês para simular só ele), o SN Padrão fica de fora do acumulado,
+    # mas pode ser comparado mês a mês. `sn_padrao_parcial` sinaliza esse caso
+    # para orientar o usuário a escolher um mês no seletor de simulação.
+    meses_com_das = [r["competencia"] for r in rows if r["das"] is not None]
+    sn_padrao_parcial = bool(meses_com_das) and not sn_padrao_ok
 
     agg: dict[str, dict] = {}
     for chave in REGIME_ORDER:
@@ -158,4 +164,6 @@ async def build_dashboard(
         "chart": chart,
         "meses_disponiveis": meses_disponiveis,
         "mes_selecionado": mes_selecionado,
+        "sn_padrao_parcial": sn_padrao_parcial,
+        "meses_com_das": meses_com_das,
     }

@@ -39,6 +39,16 @@
 </div>
 {% else %}
 
+{% if sn_padrao_parcial and not mes_selecionado %}
+<div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+  O <strong>Simples Nacional Padrão</strong> tem DAS informado em apenas
+  {{ meses_com_das | length }} de {{ meses_disponiveis | length }} {{ 'mês' if meses_disponiveis | length == 1 else 'meses' }},
+  então fica de fora da comparação do período todo. Para simular só um mês, use o seletor
+  <strong>“Simular”</strong> acima e escolha uma competência com DAS lançado:
+  {% for m in meses_com_das %}<a class="font-medium underline" href="/dashboard/{{ empresa.id }}?mes={{ m }}">{{ m | month_year_pt }}</a>{{ ", " if not loop.last }}{% endfor %}.
+</div>
+{% endif %}
+
 <!-- Card de recomendação -->
 {% if recomendado %}
 <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-6" style="border-left: 4px solid {{ recomendado.cor }}">

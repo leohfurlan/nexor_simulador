@@ -132,6 +132,32 @@ def test_dashboard_filtra_por_mes():
         assert "2 meses" in r.text
 
 
+def test_simular_mes_unico_com_das_so_daquele_mes():
+    """Fluxo do contador: DAS lançado manualmente em um único mês. No período
+    todo o SN Padrão fica parcial (com aviso guiando ao seletor); ao simular só
+    aquele mês, o SN Padrão passa a ser comparável."""
+    with TestClient(app) as client:
+        eid = _empresa(client, "Mês Único Co", [
+            ("2026-05", "114271,25", "0,00", ""),
+            ("2026-06", "95571,25", "0,00", ""),
+            ("2026-07", "65571,25", "0,00", "10688,11"),  # DAS só de julho
+        ])
+        # Período todo: SN Padrão parcial → aviso para escolher um mês.
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        assert "fica de fora da comparação do período todo" in r.text
+        assert f"/dashboard/{eid}?mes=2026-07" in r.text
+
+        # Simulando só julho: SN Padrão comparável (sem aviso de dado faltante).
+        r = client.get(f"/dashboard/{eid}?mes=2026-07")
+        assert r.status_code == 200
+        assert "informe o DAS Padrão dos meses com faturamento" not in r.text
+
+        # A tabela de lançamentos oferece o atalho "Simular mês".
+        r = client.get(f"/empresas/{eid}")
+        assert "Simular mês" in r.text
+
+
 def test_referencia_lista_categorias():
     with TestClient(app) as client:
         r = client.get("/referencia")
