@@ -107,6 +107,31 @@ def test_sn_padrao_fica_de_fora_quando_mes_com_faturamento_sem_das():
         assert "informe o DAS Padrão dos meses com faturamento" in r.text
 
 
+def test_dashboard_filtra_por_mes():
+    """Simulação pode constar apenas o mês solicitado, em vez do período todo
+    (pedido do contador)."""
+    with TestClient(app) as client:
+        eid = _empresa(client, "Filtro Mês Co", [
+            ("2026-01", "25716,90", "3000,00", "2110,71"),
+            ("2026-02", "25000,00", "3000,00", "2050,00"),
+        ])
+        # Período todo: 2 meses e faturamento somado.
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        assert "2 meses" in r.text
+        assert "Simular" in r.text  # seletor de mês presente
+
+        # Mês único: só a competência escolhida entra na simulação.
+        r = client.get(f"/dashboard/{eid}?mes=2026-01")
+        assert r.status_code == 200
+        assert "jan/2026 · faturamento" in r.text
+        assert "25.716,90" in r.text and "50.716,90" not in r.text
+
+        # Competência inexistente é ignorada → volta ao período todo.
+        r = client.get(f"/dashboard/{eid}?mes=2099-12")
+        assert "2 meses" in r.text
+
+
 def test_referencia_lista_categorias():
     with TestClient(app) as client:
         r = client.get("/referencia")

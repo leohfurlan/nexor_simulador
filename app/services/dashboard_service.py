@@ -45,10 +45,21 @@ def _reg(row: dict, chave: str) -> dict:
 
 
 async def build_dashboard(
-    session, tenant_id: uuid.UUID, empresa: Empresa
+    session, tenant_id: uuid.UUID, empresa: Empresa, competencia: str | None = None
 ) -> dict:
     params = await get_or_create_parametros(session, tenant_id)
-    rows = await compute_rows(session, tenant_id, empresa)
+    todas_rows = await compute_rows(session, tenant_id, empresa)
+
+    # Filtro por competência: a simulação pode ser feita mês a mês ou sobre o
+    # período todo. `meses_disponiveis` alimenta o seletor; `mes_selecionado`
+    # só vale se existir de fato entre os lançamentos.
+    meses_disponiveis = [r["competencia"] for r in todas_rows]
+    mes_selecionado = competencia if competencia in meses_disponiveis else None
+    rows = (
+        [r for r in todas_rows if r["competencia"] == mes_selecionado]
+        if mes_selecionado
+        else todas_rows
+    )
     n = len(rows)
 
     honorarios = {
@@ -145,4 +156,6 @@ async def build_dashboard(
         "faturamento_total": faturamento_total,
         "sn_padrao_ok": sn_padrao_ok,
         "chart": chart,
+        "meses_disponiveis": meses_disponiveis,
+        "mes_selecionado": mes_selecionado,
     }

@@ -12,10 +12,25 @@
     <a href="/dashboard" class="text-sm text-slate-500 hover:underline">← Dashboard</a>
     <h1 class="mt-1 text-2xl font-semibold text-slate-900">{{ empresa.nome }}</h1>
     <p class="text-sm text-slate-500">
-      {{ n_meses }} {{ 'mês' if n_meses == 1 else 'meses' }} · faturamento total R$ {{ faturamento_total | brl }}
+      {% if mes_selecionado %}{{ mes_selecionado | month_year_pt }} · faturamento R$ {{ faturamento_total | brl }}
+      {% else %}{{ n_meses }} {{ 'mês' if n_meses == 1 else 'meses' }} · faturamento total R$ {{ faturamento_total | brl }}{% endif %}
     </p>
   </div>
-  <a href="/empresas/{{ empresa.id }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Editar lançamentos</a>
+  <div class="flex flex-wrap items-center gap-3">
+    {% if meses_disponiveis %}
+    <label class="flex items-center gap-2 text-sm text-slate-600">
+      <span class="text-xs uppercase tracking-wide text-slate-400">Simular</span>
+      <select onchange="location.href = this.value ? '/dashboard/{{ empresa.id }}?mes=' + this.value : '/dashboard/{{ empresa.id }}'"
+              class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700">
+        <option value="" {{ 'selected' if not mes_selecionado }}>Período todo ({{ meses_disponiveis | length }} {{ 'mês' if meses_disponiveis | length == 1 else 'meses' }})</option>
+        {% for m in meses_disponiveis %}
+        <option value="{{ m }}" {{ 'selected' if m == mes_selecionado }}>{{ m | month_year_pt }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    {% endif %}
+    <a href="/empresas/{{ empresa.id }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Editar lançamentos</a>
+  </div>
 </div>
 
 {% if not n_meses %}

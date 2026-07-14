@@ -31,12 +31,15 @@ async def escolher(
 async def painel(
     empresa_id: uuid.UUID,
     request: Request,
+    mes: str = "",
     tenant_id: uuid.UUID = Depends(get_tenant_id),
     session: AsyncSession = Depends(get_async_session),
 ):
     empresa = await empresa_service.get_empresa(session, tenant_id, empresa_id)
     if empresa is None:
         return RedirectResponse(url="/dashboard", status_code=303)
-    dados = await dashboard_service.build_dashboard(session, tenant_id, empresa)
+    dados = await dashboard_service.build_dashboard(
+        session, tenant_id, empresa, competencia=mes.strip() or None
+    )
     dados["active"] = "dashboard"
     return templates.TemplateResponse(request, "dashboard/detail.html", dados)
