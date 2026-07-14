@@ -62,6 +62,51 @@ def test_dashboard_renderiza_com_recomendacao_e_grafico():
         assert "chartPct" in r.text and "chartCusto" in r.text  # gráficos presentes
 
 
+def _empresa(client, nome, lancamentos):
+    r = client.post(
+        "/empresas",
+        data={"nome": nome, "regime_atual": "lp_puro"},
+        follow_redirects=False,
+    )
+    url = r.headers["location"]
+    for comp, fat, desp, das in lancamentos:
+        client.post(
+            f"{url}/lancamentos",
+            data={"competencia": comp, "faturamento": fat,
+                  "despesas_com_credito": desp, "das_padrao_apurado": das},
+        )
+    return url.rsplit("/", 1)[1]
+
+
+def test_sn_padrao_entra_na_simulacao_com_mes_sem_movimento_sem_das():
+    """DAS informado em todos os meses com faturamento inclui o SN Padrão no
+    acumulado, mesmo que haja mês sem movimento sem DAS (bug reportado pelo
+    contador: "salvamos o DAS e não inclui na Simulação")."""
+    with TestClient(app) as client:
+        eid = _empresa(client, "SN Movimento Co", [
+            ("2026-01", "25716,90", "3000,00", "2110,71"),
+            ("2026-02", "25000,00", "3000,00", "2050,00"),
+            ("2026-03", "0,00", "0,00", ""),  # mês sem movimento, DAS em branco
+        ])
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        # SN Padrão comparável → não mostra o aviso de dado faltante.
+        assert "informe o DAS Padrão dos meses com faturamento" not in r.text
+
+
+def test_sn_padrao_fica_de_fora_quando_mes_com_faturamento_sem_das():
+    """Se um mês COM faturamento não tem DAS, o SN Padrão continua fora do
+    acumulado (o total seria subestimado — comparação injusta)."""
+    with TestClient(app) as client:
+        eid = _empresa(client, "SN Faltante Co", [
+            ("2026-01", "25716,90", "3000,00", "2110,71"),
+            ("2026-02", "25000,00", "3000,00", ""),  # tem faturamento, sem DAS
+        ])
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        assert "informe o DAS Padrão dos meses com faturamento" in r.text
+
+
 def test_referencia_lista_categorias():
     with TestClient(app) as client:
         r = client.get("/referencia")

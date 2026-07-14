@@ -58,8 +58,17 @@ async def build_dashboard(
         LP_CREDITO: params.honorario_lucro_presumido,
     }
     faturamento_total = sum((r["faturamento"] for r in rows), Decimal("0"))
-    # SN Padrão só é comparável se TODOS os meses têm o DAS informado.
-    sn_padrao_ok = n > 0 and all(r["das"] is not None for r in rows)
+    # SN Padrão entra no acumulado quando o DAS foi informado em todos os meses
+    # COM movimento (faturamento > 0). Meses sem movimento não exigem DAS: tanto
+    # o SN Padrão quanto os demais regimes contribuem ~0, então não distorcem a
+    # comparação. Basta o DAS ter sido informado em ao menos um mês.
+    meses_com_movimento = [r for r in rows if r["faturamento"] > 0]
+    tem_das = any(r["das"] is not None for r in rows)
+    sn_padrao_ok = (
+        n > 0
+        and tem_das
+        and all(r["das"] is not None for r in meses_com_movimento)
+    )
 
     agg: dict[str, dict] = {}
     for chave in REGIME_ORDER:
