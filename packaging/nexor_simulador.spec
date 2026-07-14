@@ -14,6 +14,12 @@ a = Analysis(
     ],
     hiddenimports=[
         "aiosqlite",
+        # asyncpg é carregado dinamicamente pelo SQLAlchemy (dialeto
+        # postgresql+asyncpg) — o PyInstaller não o detecta sozinho. Sem ele, a
+        # tela "Clientes (Nexor Fiscal)" falha no executável.
+        "asyncpg",
+        # openpyxl é importado sob demanda no import de planilhas .xlsx.
+        "openpyxl",
         "uvicorn.lifespan.on",
         "uvicorn.loops.asyncio",
         "uvicorn.protocols.http.h11_impl",

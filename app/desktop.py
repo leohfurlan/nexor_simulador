@@ -38,12 +38,40 @@ def _local_app_data() -> Path:
     return Path(base) if base else Path.home() / "AppData" / "Local"
 
 
+def _load_persistent_env(data_root: Path) -> None:
+    """Carrega um .env persistente da pasta de dados (fora do bundle).
+
+    O .env do projeto NÃO é embutido no executável (contém segredos), então a
+    integração com o Nexor Fiscal (NEXOR_FISCAL_DATABASE_URL) é lida daqui:
+    basta colocar um arquivo `.env` em %LOCALAPPDATA%/NexorSimulador. DATABASE_URL
+    e DEBUG são sempre definidos pelo próprio launcher logo abaixo.
+    """
+    env_path = data_root / ".env"
+    if not env_path.exists():
+        return
+    try:
+        for raw in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+    except OSError:
+        pass
+
+
 def _configure_environment() -> tuple[Path, Path]:
     data_root = _local_app_data() / "NexorSimulador"
     database_dir = data_root / "data"
     log_dir = data_root / "logs"
     database_dir.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
+
+    # Lê o .env persistente ANTES de fixar DATABASE_URL/DEBUG (que o launcher controla).
+    _load_persistent_env(data_root)
 
     database_path = database_dir / "nexor_sim.db"
     os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{database_path.as_posix()}"
