@@ -62,6 +62,25 @@ def test_dashboard_renderiza_com_recomendacao_e_grafico():
         assert "chartPct" in r.text and "chartCusto" in r.text  # gráficos presentes
 
 
+def test_dashboard_tem_repasse_pdf_e_copiar_resumo():
+    """Regime atual (LP) mais caro que o recomendado (SN Padrão) → sugestão de
+    repasse de preço com folga; botões de exportação presentes."""
+    with TestClient(app) as client:
+        empresa_url = _empresa_com_lancamentos(client)
+        empresa_id = empresa_url.rsplit("/", 1)[1]
+
+        r = client.get(f"/dashboard/{empresa_id}")
+        assert r.status_code == 200
+        assert "Sugestão de repasse de preço" in r.text
+        assert "folga" in r.text.lower()          # recomendado é mais barato
+        assert "Gerar PDF" in r.text
+        assert "Copiar resumo" in r.text
+        assert "const RESUMO" in r.text            # resumo embutido p/ clipboard
+        # Banner de alíquotas provisórias presente no dashboard e em configurações.
+        assert "Alíquotas provisórias" in r.text
+        assert "Alíquotas provisórias" in client.get("/configuracoes").text
+
+
 def _empresa(client, nome, lancamentos):
     r = client.post(
         "/empresas",
