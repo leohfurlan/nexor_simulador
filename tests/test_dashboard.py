@@ -79,6 +79,24 @@ def test_dashboard_tem_repasse_pdf_e_copiar_resumo():
         # Banner de alíquotas provisórias presente no dashboard e em configurações.
         assert "Alíquotas provisórias" in r.text
         assert "Alíquotas provisórias" in client.get("/configuracoes").text
+        # Linha do tempo da transição (2026–2033).
+        assert "Linha do tempo da Reforma" in r.text
+        assert "2033" in r.text and "Reforma plena" in r.text
+
+
+def test_linha_tempo_marca_ano_atual():
+    import datetime as dt
+
+    from app.services.reforma import linha_tempo
+
+    marcos = linha_tempo(hoje=dt.date(2026, 7, 18))
+    assert [m["ano"] for m in marcos] == [
+        "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033"
+    ]
+    atuais = [m["ano"] for m in marcos if m["atual"]]
+    assert atuais == ["2026"]
+    # Fora do intervalo: nenhum ano marcado como atual.
+    assert not any(m["atual"] for m in linha_tempo(hoje=dt.date(2040, 1, 1)))
 
 
 def _empresa(client, nome, lancamentos):

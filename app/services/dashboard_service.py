@@ -20,6 +20,7 @@ from app.calc.engine import (
 from app.models import Empresa
 from app.services.lancamento_service import compute_rows
 from app.services.parametros_service import get_or_create_parametros
+from app.services.reforma import linha_tempo
 
 REGIME_ORDER = (SN_PADRAO, SN_HIBRIDO, LP_PURO, LP_CREDITO)
 REGIME_CORES = {
@@ -274,6 +275,7 @@ async def build_dashboard(
         "economia": economia,
         "repasse": repasse,
         "resumo": resumo,
+        "linha_tempo": linha_tempo(),
         "n_meses": n,
         "faturamento_total": faturamento_total,
         "sn_padrao_ok": sn_padrao_ok,
