@@ -16,7 +16,7 @@
       {% else %}{{ n_meses }} {{ 'mês' if n_meses == 1 else 'meses' }} · faturamento total R$ {{ faturamento_total | brl }}{% endif %}
     </p>
   </div>
-  <div class="flex flex-wrap items-center gap-3">
+  <div class="flex flex-wrap items-center gap-3 print:hidden">
     {% if meses_disponiveis %}
     <label class="flex items-center gap-2 text-sm text-slate-600">
       <span class="text-xs uppercase tracking-wide text-slate-400">Simular</span>
@@ -29,9 +29,17 @@
       </select>
     </label>
     {% endif %}
+    {% if n_meses %}
+    <button type="button" onclick="window.print()"
+            class="rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50">Gerar PDF</button>
+    <button type="button" id="btn-copiar" onclick="copiarResumo()"
+            class="rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50">Copiar resumo</button>
+    {% endif %}
     <a href="/empresas/{{ empresa.id }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Editar lançamentos</a>
   </div>
 </div>
+
+{% if n_meses %}{% include "partials/aviso_aliquotas.html" %}{% endif %}
 
 {% if not n_meses %}
 <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
@@ -75,7 +83,38 @@
     (projeção de <strong>R$ {{ economia.anual | brl }}</strong> por ano).
   </p>
   {% elif not empresa.regime_atual %}
-  <p class="mt-4 text-xs text-slate-400">Defina o “regime atual” no cadastro da empresa para ver a economia estimada.</p>
+  <p class="mt-4 text-xs text-slate-400">Defina o “regime atual” no cadastro da empresa para ver a economia estimada e a sugestão de repasse de preço.</p>
+  {% endif %}
+  {% if repasse and repasse.pct is not none and repasse.sentido != 'neutro' %}
+  <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Sugestão de repasse de preço</p>
+    {% if repasse.sentido == 'aumento' %}
+    <p class="mt-1 text-slate-700">
+      O novo regime aumenta os tributos em <strong>R$ {{ repasse.delta_mensal | brl }}/mês</strong>.
+      Para preservar a margem, repasse cerca de
+      <strong class="text-rose-600">+{{ repasse.pct | pct }}%</strong> no preço.
+    </p>
+    {% else %}
+    <p class="mt-1 text-slate-700">
+      O regime recomendado reduz os tributos em <strong>R$ {{ (-repasse.delta_mensal) | brl }}/mês</strong>.
+      Você tem folga de até
+      <strong class="text-emerald-700">{{ (-repasse.pct) | pct }}%</strong>
+      no preço mantendo a margem — vantagem competitiva.
+    </p>
+    {% endif %}
+    {% if repasse.margem_sem_repasse is not none %}
+    <p class="mt-2 text-slate-700">
+      Margem estimada: <strong>{{ repasse.margem | pct }}%</strong> →
+      <strong class="{{ 'text-rose-600' if repasse.margem_sem_repasse < 0 else 'text-slate-900' }}">{{ repasse.margem_sem_repasse | pct }}%</strong>
+      sem repasse{% if repasse.margem_sem_repasse < 0 %} — a mudança consumiria toda a margem{% endif %}.
+    </p>
+    {% else %}
+    <p class="mt-2 text-xs text-slate-400">
+      Informe a <a href="/empresas/{{ empresa.id }}" class="underline">margem de lucro estimada</a> no cadastro para ver o impacto na margem.
+    </p>
+    {% endif %}
+    <p class="mt-1 text-xs text-slate-400">Comparado ao regime atual; o repasse considera que o preço maior também é tributado.</p>
+  </div>
   {% endif %}
   {% if empresa.exige_credito_cliente %}
   <p class="mt-2 text-xs text-slate-400">O SN Padrão foi desconsiderado porque o cliente exige crédito de IBS/CBS (não há repasse).</p>
@@ -83,8 +122,8 @@
 </section>
 {% endif %}
 
-<!-- 4 cards por regime -->
-<section class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+<!-- Cards por regime -->
+<section class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
   {% for c in cards %}
   <div class="rounded-xl border border-slate-200 bg-white p-4" style="border-top: 3px solid {{ c.cor }}">
     <div class="flex items-center justify-between">
@@ -106,7 +145,10 @@
     </dl>
     {% else %}
     <p class="mt-3 text-xl text-slate-300">—</p>
-    <p class="text-xs text-slate-400">informe o DAS Padrão dos meses com faturamento para comparar</p>
+    <p class="text-xs text-slate-400">
+      {% if c.chave == 'lp_real' %}informe a margem de lucro estimada no cadastro para comparar
+      {% else %}informe o DAS Padrão dos meses com faturamento para comparar{% endif %}
+    </p>
     {% endif %}
   </div>
   {% endfor %}
@@ -125,6 +167,12 @@
     <div class="mt-3"><canvas id="chartCusto" height="220"></canvas></div>
   </div>
 </section>
+
+<!-- Carga atual (pré-reforma) estimada por setor -->
+{% if carga_atual %}{% include "partials/carga_atual.html" %}{% endif %}
+
+<!-- Linha do tempo da transição da Reforma -->
+{% include "partials/linha_tempo.html" %}
 
 <!-- Tabela detalhada -->
 <section class="rounded-xl border border-slate-200 bg-white p-5">
@@ -179,6 +227,23 @@
 
 {% block scripts %}
 {% if n_meses %}
+<script>
+  const RESUMO = {{ resumo | tojson }};
+  function copiarResumo() {
+    const btn = document.getElementById('btn-copiar');
+    const feito = () => { if (btn) { const t = btn.textContent; btn.textContent = 'Copiado!'; setTimeout(() => { btn.textContent = t; }, 1800); } };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(RESUMO).then(feito).catch(fallback);
+    } else { fallback(); }
+    function fallback() {
+      const ta = document.createElement('textarea');
+      ta.value = RESUMO; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); feito(); } catch (e) { /* silencioso */ }
+      document.body.removeChild(ta);
+    }
+  }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
   const DASH = {{ chart | tojson }};

@@ -20,11 +20,17 @@ ALIQUOTA_FIELDS = (
     "aliquota_hibrido_total",
     "aliquota_credito_despesa",
     "aliquota_lucro_presumido",
+    "aliquota_lucro_real_irpj_csll",
+    "aliquota_pis",
+    "aliquota_cofins",
+    "aliquota_iss",
+    "aliquota_icms",
 )
 HONORARIO_FIELDS = (
     "honorario_hibrido",
     "honorario_padrao",
     "honorario_lucro_presumido",
+    "honorario_lucro_real",
 )
 CAMPOS_EDITAVEIS = ALIQUOTA_FIELDS + HONORARIO_FIELDS
 

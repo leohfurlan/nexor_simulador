@@ -16,17 +16,19 @@ Number = Union[int, float, str, Decimal, None]
 
 CENTAVO = Decimal("0.01")
 
-# Chaves canônicas dos quatro regimes comparados (PRD seção 1).
+# Chaves canônicas dos regimes comparados (PRD seção 1 + Lucro Real).
 SN_PADRAO = "sn_padrao"
 SN_HIBRIDO = "sn_hibrido"
 LP_PURO = "lp_puro"
 LP_CREDITO = "lp_credito"
+LP_REAL = "lp_real"
 
 NOMES_REGIME = {
     SN_PADRAO: "Simples Nacional Padrão",
     SN_HIBRIDO: "Simples Nacional Híbrido",
     LP_PURO: "Lucro Presumido",
     LP_CREDITO: "Lucro Presumido c/ crédito IBS/CBS",
+    LP_REAL: "Lucro Real",
 }
 
 
@@ -71,6 +73,7 @@ class ResultadoCalculo:
     ibs: Decimal                  # informativo
     total_ibs_cbs: Decimal        # cbs + ibs
     hibrido_bruto: Decimal        # F * aliquota_hibrido_total (antes do crédito)
+    lucro_real_base: Decimal      # lucro estimado (margem * F) usado no Lucro Real
     regimes: dict[str, ResultadoRegime]
 
 
@@ -79,13 +82,21 @@ def calcular_lancamento(
     despesas_com_credito: Number,
     das_padrao_apurado: Number,
     params: Optional[Parametros] = None,
+    margem: Number = None,
 ) -> ResultadoCalculo:
-    """Calcula os quatro regimes para um lançamento mensal (PRD seção 6)."""
+    """Calcula os regimes para um lançamento mensal (PRD seção 6 + Lucro Real).
+
+    `margem` (fração da receita, ex.: 0.20) é a margem de lucro estimada da
+    empresa. Necessária para o Lucro Real (IRPJ/CSLL incidem sobre o lucro);
+    quando ausente, o Lucro Real é calculado sobre lucro zero e deve ser
+    marcado como indisponível pela camada superior.
+    """
     params = params or Parametros()
 
     F = _to_decimal(faturamento)
     D = _to_decimal(despesas_com_credito)
     das_padrao = _to_decimal(das_padrao_apurado)
+    m = _to_decimal(margem)
 
     # Créditos gerados pelas despesas.
     credito_despesa = _centavos(D * params.aliquota_credito_despesa)
@@ -108,6 +119,13 @@ def calcular_lancamento(
     # ④ Lucro Presumido c/ aproveitamento de IBS/CBS
     lp_credito_valor = _centavos(lp_valor - credito_despesa)
 
+    # ⑤ Lucro Real: IRPJ/CSLL sobre o lucro estimado (margem * F) + IBS/CBS
+    # sobre a receita, líquidos do crédito das despesas. Só é significativo com
+    # a margem informada.
+    lucro_real_base = _centavos(F * m)
+    lp_real_irpj_csll = _centavos(lucro_real_base * params.aliquota_lucro_real_irpj_csll)
+    lp_real_valor = _centavos(lp_real_irpj_csll + total_ibs_cbs - credito_despesa)
+
     def _regime(chave: str, imposto: Decimal, honorario: Decimal) -> ResultadoRegime:
         honorario = _to_decimal(honorario)
         return ResultadoRegime(
@@ -124,6 +142,7 @@ def calcular_lancamento(
         SN_HIBRIDO: _regime(SN_HIBRIDO, hibrido_liquido, params.honorario_hibrido),
         LP_PURO: _regime(LP_PURO, lp_valor, params.honorario_lucro_presumido),
         LP_CREDITO: _regime(LP_CREDITO, lp_credito_valor, params.honorario_lucro_presumido),
+        LP_REAL: _regime(LP_REAL, lp_real_valor, params.honorario_lucro_real),
     }
 
     return ResultadoCalculo(
@@ -134,5 +153,6 @@ def calcular_lancamento(
         ibs=ibs,
         total_ibs_cbs=total_ibs_cbs,
         hibrido_bruto=hibrido_bruto,
+        lucro_real_base=lucro_real_base,
         regimes=regimes,
     )

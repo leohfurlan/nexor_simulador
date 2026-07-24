@@ -62,6 +62,119 @@ def test_dashboard_renderiza_com_recomendacao_e_grafico():
         assert "chartPct" in r.text and "chartCusto" in r.text  # gráficos presentes
 
 
+def test_dashboard_tem_repasse_pdf_e_copiar_resumo():
+    """Regime atual (LP) mais caro que o recomendado (SN Padrão) → sugestão de
+    repasse de preço com folga; botões de exportação presentes."""
+    with TestClient(app) as client:
+        empresa_url = _empresa_com_lancamentos(client)
+        empresa_id = empresa_url.rsplit("/", 1)[1]
+
+        r = client.get(f"/dashboard/{empresa_id}")
+        assert r.status_code == 200
+        assert "Sugestão de repasse de preço" in r.text
+        assert "folga" in r.text.lower()          # recomendado é mais barato
+        # Sem margem cadastrada: convite a informá-la.
+        assert "para ver o impacto na margem" in r.text
+        assert "Gerar PDF" in r.text
+        assert "Copiar resumo" in r.text
+        assert "const RESUMO" in r.text            # resumo embutido p/ clipboard
+        # Banner de alíquotas provisórias presente no dashboard e em configurações.
+        assert "Alíquotas provisórias" in r.text
+        assert "Alíquotas provisórias" in client.get("/configuracoes").text
+        # Linha do tempo da transição (2026–2033).
+        assert "Linha do tempo da Reforma" in r.text
+        assert "2033" in r.text and "Reforma plena" in r.text
+
+
+def test_repasse_usa_margem_de_lucro_estimada():
+    """Com margem cadastrada, o repasse projeta a margem sem repasse. Regime
+    recomendado (SN Padrão) reduz a carga → margem projetada sobe."""
+    with TestClient(app) as client:
+        r = client.post(
+            "/empresas",
+            data={"nome": "Margem Co", "regime_atual": "lp_puro",
+                  "margem_lucro_estimada": "20"},
+            follow_redirects=False,
+        )
+        url = r.headers["location"]
+        for comp, fat, desp, das in [
+            ("2026-01", "25716,90", "3000,00", "2110,71"),
+            ("2026-02", "25000,00", "3000,00", "2050,00"),
+        ]:
+            client.post(
+                f"{url}/lancamentos",
+                data={"competencia": comp, "faturamento": fat,
+                      "despesas_com_credito": desp, "das_padrao_apurado": das},
+            )
+        eid = url.rsplit("/", 1)[1]
+
+        # Badge da margem no cadastro.
+        assert "margem 20,00%" in client.get(f"/empresas/{eid}").text
+
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        assert "Margem estimada" in r.text
+        # 20% + queda de carga (~8,35pp) → ~28,35% sem repasse.
+        assert "20,00%" in r.text and "28,35%" in r.text
+        assert "para ver o impacto na margem" not in r.text
+        # Com margem, o Lucro Real passa a ser comparável (card presente).
+        assert "Lucro Real" in r.text
+
+
+def test_lucro_real_indisponivel_sem_margem():
+    """Sem margem cadastrada, o Lucro Real aparece como indisponível (—),
+    não distorcendo a recomendação."""
+    with TestClient(app) as client:
+        eid = _empresa(client, "Sem Margem Co", [
+            ("2026-01", "25716,90", "3000,00", "2110,71"),
+        ])
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        assert "Lucro Real" in r.text  # card existe
+        # marcado como indisponível por falta de margem
+        assert "informe" in r.text.lower()
+
+
+def test_dashboard_mostra_carga_atual_por_setor():
+    """Com setor informado, o Dashboard exibe a estimativa da carga atual e o
+    comparativo antes × depois."""
+    with TestClient(app) as client:
+        r = client.post(
+            "/empresas",
+            data={"nome": "Setor Co", "regime_atual": "lp_puro",
+                  "setor": "comercio", "uf": "SP"},
+            follow_redirects=False,
+        )
+        url = r.headers["location"]
+        client.post(
+            f"{url}/lancamentos",
+            data={"competencia": "2026-01", "faturamento": "10000,00",
+                  "despesas_com_credito": "0,00", "das_padrao_apurado": "800,00"},
+        )
+        eid = url.rsplit("/", 1)[1]
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        assert "Carga atual (pré-reforma) estimada" in r.text
+        assert "Comércio" in r.text and "ICMS" in r.text
+        assert "Antes × depois" in r.text
+        assert "1.800,00" in r.text  # ICMS SP 18% de 10.000
+
+
+def test_linha_tempo_marca_ano_atual():
+    import datetime as dt
+
+    from app.services.reforma import linha_tempo
+
+    marcos = linha_tempo(hoje=dt.date(2026, 7, 18))
+    assert [m["ano"] for m in marcos] == [
+        "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033"
+    ]
+    atuais = [m["ano"] for m in marcos if m["atual"]]
+    assert atuais == ["2026"]
+    # Fora do intervalo: nenhum ano marcado como atual.
+    assert not any(m["atual"] for m in linha_tempo(hoje=dt.date(2040, 1, 1)))
+
+
 def _empresa(client, nome, lancamentos):
     r = client.post(
         "/empresas",

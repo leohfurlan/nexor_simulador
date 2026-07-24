@@ -6,8 +6,9 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import Boolean, DateTime, String, Uuid, func
+from sqlalchemy import Boolean, DateTime, Numeric, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -24,10 +25,20 @@ class Empresa(Base):
     nome: Mapped[str] = mapped_column(String(200))
     cnpj: Mapped[str | None] = mapped_column(String(18), nullable=True)
     atividade: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    # Setor de atividade (comercio/industria/servico): define ISS × ICMS na
+    # estimativa da carga atual (pré-reforma). Opcional.
+    setor: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # UF (sigla, ex.: "SP") para estimar a alíquota interna de ICMS. Opcional.
+    uf: Mapped[str | None] = mapped_column(String(2), nullable=True)
     exige_credito_cliente: Mapped[bool] = mapped_column(Boolean, default=False)
     # Chave do regime atual da empresa (sn_padrao/sn_hibrido/lp_puro/lp_credito),
     # base para a "economia anual vs. regime atual" (PRD 7.4). Opcional.
     regime_atual: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    # Margem de lucro líquida estimada (fração: 0.20 == 20%). Opcional; usada
+    # para refinar a sugestão de repasse de preço (impacto na margem).
+    margem_lucro_estimada: Mapped[Decimal | None] = mapped_column(
+        Numeric(6, 5), nullable=True
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

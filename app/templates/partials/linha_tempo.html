@@ -1,0 +1,24 @@
+{# Linha do tempo da transição da Reforma (2026–2033). Vertical para caber bem
+   na tela estreita e na impressão/PDF. Dados vêm de app/services/reforma.py. #}
+<section class="mb-6 rounded-xl border border-slate-200 bg-white p-5">
+  <h3 class="text-sm font-semibold text-slate-800">Linha do tempo da Reforma (2026–2033)</h3>
+  <p class="text-xs text-slate-400">Como o IBS/CBS substitui os tributos atuais ao longo da transição.</p>
+  <ol class="mt-4">
+    {% for m in linha_tempo %}
+    <li class="flex gap-4">
+      <div class="flex flex-col items-center">
+        <span class="grid h-9 w-14 shrink-0 place-items-center rounded-lg text-xs font-bold {{ 'bg-slate-900 text-white' if m.atual else 'bg-slate-100 text-slate-600' }}">{{ m.ano }}</span>
+        {% if not loop.last %}<span class="my-1 w-px flex-1 bg-slate-200"></span>{% endif %}
+      </div>
+      <div class="{{ 'pb-5' if not loop.last else 'pb-1' }} pt-1">
+        <p class="text-sm font-medium text-slate-800">
+          {{ m.titulo }}
+          {% if m.atual %}<span class="ml-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">ANO ATUAL</span>{% endif %}
+        </p>
+        <p class="mt-0.5 text-xs text-slate-500">{{ m.descricao }}</p>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="mt-2 text-xs text-slate-400">Marcos conforme a EC 132/2023 e a LC 214/2025; as alíquotas de referência ainda podem ser ajustadas.</p>
+</section>

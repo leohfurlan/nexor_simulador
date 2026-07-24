@@ -1,0 +1,34 @@
+{# Estimativa da carga atual (pré-reforma) por setor + comparativo antes×depois.
+   Requer a variável `carga_atual` no contexto (dashboard_service). #}
+<section class="mb-6 rounded-xl border border-slate-200 bg-white p-5">
+  <h3 class="text-sm font-semibold text-slate-800">
+    Carga atual (pré-reforma) estimada — {{ carga_atual.setor_nome }}{% if carga_atual.uf %} · {{ carga_atual.uf }}{% endif %}
+  </h3>
+  <p class="text-xs text-slate-400">
+    Estimativa simplificada sobre a receita (referência de Lucro Presumido). Não inclui
+    IRPJ/CSLL, IPI, substituição tributária nem o Simples Nacional.
+  </p>
+  <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div><p class="text-xs text-slate-500">PIS</p><p class="font-medium tabular-nums text-slate-900">R$ {{ carga_atual.pis | brl }}</p></div>
+    <div><p class="text-xs text-slate-500">COFINS</p><p class="font-medium tabular-nums text-slate-900">R$ {{ carga_atual.cofins | brl }}</p></div>
+    {% if carga_atual.usa_iss %}
+    <div><p class="text-xs text-slate-500">ISS ({{ carga_atual.aliquota_est_mun | pct }}%)</p><p class="font-medium tabular-nums text-slate-900">R$ {{ carga_atual.iss | brl }}</p></div>
+    {% else %}
+    <div><p class="text-xs text-slate-500">ICMS ({{ carga_atual.aliquota_est_mun | pct }}%)</p><p class="font-medium tabular-nums text-slate-900">R$ {{ carga_atual.icms | brl }}</p></div>
+    {% endif %}
+    <div><p class="text-xs text-slate-500">Total</p><p class="font-semibold tabular-nums text-slate-900">R$ {{ carga_atual.total | brl }}{% if carga_atual.pct is not none %} · {{ carga_atual.pct | pct }}%{% endif %}</p></div>
+  </div>
+  <div class="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-sm">
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Antes × depois (tributos sobre consumo)</p>
+    <p class="mt-1 text-slate-700">
+      Carga atual estimada <strong>R$ {{ carga_atual.total | brl }}</strong> →
+      IBS/CBS líquido de crédito <strong>R$ {{ carga_atual.reforma | brl }}</strong>
+      {% if carga_atual.delta > 0 %}
+      (<strong class="text-rose-600">+R$ {{ carga_atual.delta | brl }}</strong> com a reforma).
+      {% elif carga_atual.delta < 0 %}
+      (<strong class="text-emerald-700">−R$ {{ (-carga_atual.delta) | brl }}</strong> com a reforma).
+      {% else %}(sem variação).{% endif %}
+    </p>
+    <p class="mt-1 text-xs text-slate-400">O IBS/CBS substitui PIS, COFINS e ICMS/ISS; IRPJ e CSLL não mudam.</p>
+  </div>
+</section>

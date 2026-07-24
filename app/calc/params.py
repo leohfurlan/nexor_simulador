@@ -19,8 +19,17 @@ class Parametros:
     aliquota_hibrido_total: Decimal = Decimal("0.163")  # Imposto bruto SN Híbrido
     aliquota_credito_despesa: Decimal = Decimal("0.27")  # Crédito gerado por despesas
     aliquota_lucro_presumido: Decimal = Decimal("0.1655")  # IRPJ+CSLL+IBS/CBS
+    aliquota_lucro_real_irpj_csll: Decimal = Decimal("0.34")  # IRPJ+adic.+CSLL s/ lucro
+
+    # Estimativa da carga atual (pré-reforma) sobre a receita — referência para
+    # o comparativo "antes × depois". Valores típicos do Lucro Presumido.
+    aliquota_pis: Decimal = Decimal("0.0065")     # PIS cumulativo
+    aliquota_cofins: Decimal = Decimal("0.03")    # COFINS cumulativa
+    aliquota_iss: Decimal = Decimal("0.05")       # ISS (serviços) — típico
+    aliquota_icms: Decimal = Decimal("0.18")      # ICMS interno padrão (fallback)
 
     # Honorários mensais (R$)
     honorario_hibrido: Decimal = Decimal("550")
     honorario_padrao: Decimal = Decimal("350")
     honorario_lucro_presumido: Decimal = Decimal("750")
+    honorario_lucro_real: Decimal = Decimal("900")

@@ -8,6 +8,7 @@ from decimal import Decimal
 from app.calc.engine import (
     LP_CREDITO,
     LP_PURO,
+    LP_REAL,
     SN_HIBRIDO,
     SN_PADRAO,
     calcular_lancamento,
@@ -53,6 +54,22 @@ def test_caso_referencia_percentuais():
     assert pct(LP_PURO) == Decimal("0.1655")     # 16,55%
 
 
+# --- Lucro Real (5º cenário, depende da margem) ------------------------------
+
+def test_lucro_real_usa_margem_e_ibs_cbs():
+    # F=1000, margem=20% -> lucro=200; IRPJ/CSLL 34% -> 68,00
+    # IBS/CBS = 1000 * (2,7% + 8,8%) = 115,00; sem crédito (D=0)
+    r = calcular_lancamento("1000", "0", "0", margem="0.20")
+    assert r.lucro_real_base == Decimal("200.00")
+    assert r.regimes[LP_REAL].imposto == Decimal("183.00")  # 68 + 115 - 0
+
+
+def test_lucro_real_desconta_credito_das_despesas():
+    # D=100 -> crédito 27,00 abate o IBS/CBS do Lucro Real
+    r = calcular_lancamento("1000", "100", "0", margem="0.20")
+    assert r.regimes[LP_REAL].imposto == Decimal("156.00")  # 68 + 115 - 27
+
+
 # --- Bordas: faturamento zero/vazio -> nunca #DIV/0! --------------------------
 
 def test_faturamento_zero_nao_calcula_percentual():
@@ -84,12 +101,14 @@ def test_parametros_sao_injetados():
 
 def test_recomendacao_menor_custo_total():
     # custo total: padrão 2.460,71 | híbrido 3.931,85 | lp_cred 4.196,15 | lp 5.006,15
-    rec = recomendar(_resultado_ref(), exige_credito_cliente=False)
+    # Lucro Real fora: o caso de referência não informa margem.
+    rec = recomendar(_resultado_ref(), exige_credito_cliente=False, excluir={LP_REAL})
     assert rec.regime.chave == SN_PADRAO
 
 
 def test_recomendacao_desqualifica_sn_padrao_quando_exige_credito():
-    rec = recomendar(_resultado_ref(), exige_credito_cliente=True)
+    # Sem margem, o Lucro Real não é candidato (excluído como no app).
+    rec = recomendar(_resultado_ref(), exige_credito_cliente=True, excluir={LP_REAL})
     assert SN_PADRAO in rec.desqualificados
     assert rec.regime.chave != SN_PADRAO
     # entre os que repassam crédito, o menor custo total é o SN Híbrido
