@@ -35,6 +35,15 @@
         {% for chave, rotulo in regimes %}<option value="{{ chave }}">{{ rotulo }}</option>{% endfor %}
       </select>
     </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Margem de lucro estimada</span>
+      <span class="block text-xs text-slate-400">Opcional. Usada na sugestão de repasse de preço.</span>
+      <div class="mt-1 flex items-center">
+        <input name="margem_lucro_estimada" type="number" step="0.01" min="0" max="100" placeholder="ex.: 20"
+               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+        <span class="ml-2 text-sm text-slate-400">%</span>
+      </div>
+    </label>
     <label class="flex items-center gap-2 sm:col-span-2">
       <input type="checkbox" name="exige_credito_cliente" value="1" class="h-4 w-4 rounded border-slate-300" />
       <span class="text-sm text-slate-700">O cliente exige crédito de IBS/CBS (B2B)</span>

@@ -45,6 +45,7 @@ async def criar(
     atividade: str = Form(""),
     exige_credito_cliente: str | None = Form(None),
     regime_atual: str = Form(""),
+    margem_lucro_estimada: str = Form(""),
     tenant_id: uuid.UUID = Depends(get_tenant_id),
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -62,6 +63,7 @@ async def criar(
         nome=nome, cnpj=cnpj, atividade=atividade,
         exige_credito_cliente=exige_credito_cliente is not None,
         regime_atual=regime_atual,
+        margem_lucro_estimada=margem_lucro_estimada,
     )
     return RedirectResponse(url=f"/empresas/{empresa.id}", status_code=303)
 
@@ -92,6 +94,7 @@ async def editar(
     atividade: str = Form(""),
     exige_credito_cliente: str | None = Form(None),
     regime_atual: str = Form(""),
+    margem_lucro_estimada: str = Form(""),
     tenant_id: uuid.UUID = Depends(get_tenant_id),
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -100,6 +103,7 @@ async def editar(
         nome=nome, cnpj=cnpj, atividade=atividade,
         exige_credito_cliente=exige_credito_cliente is not None,
         regime_atual=regime_atual,
+        margem_lucro_estimada=margem_lucro_estimada,
     )
     return RedirectResponse(url=f"/empresas/{empresa_id}", status_code=303)
 

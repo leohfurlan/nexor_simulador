@@ -106,8 +106,13 @@ def _montar_resumo(
         elif repasse["sentido"] == "reducao":
             linhas.append(
                 f"Folga de preço: você pode reduzir o preço em até "
-                f"{_fmt_pct(abs(repasse['pct'] or 0))} mantendo a margem — "
+                f"{_fmt_pct(abs(repasse['pct']))} mantendo a margem — "
                 f"vantagem competitiva do regime recomendado."
+            )
+        if repasse.get("margem_sem_repasse") is not None:
+            linhas.append(
+                f"  Margem estimada: {_fmt_pct(repasse['margem'])} → "
+                f"{_fmt_pct(repasse['margem_sem_repasse'])} sem repasse."
             )
     linhas.append("")
     linhas.append("Comparativo por regime (custo total no período):")
@@ -219,13 +224,36 @@ async def build_dashboard(
     repasse = None
     if recomendado and atual in agg and agg[atual]["disponivel"] and atual != recomendado:
         delta = agg[recomendado]["imposto_total"] - agg[atual]["imposto_total"]
+        # delta_t: variação da carga tributária em pontos de receita (fração).
+        delta_t = (delta / faturamento_total) if faturamento_total > 0 else None
+        # % a repassar no preço com gross-up pela alíquota do novo regime: como
+        # o preço maior também é tributado, o repasse necessário para preservar a
+        # margem é (t_rec - t_atual) / (1 - t_rec), não apenas (t_rec - t_atual).
+        t_rec = (
+            agg[recomendado]["imposto_total"] / faturamento_total
+            if faturamento_total > 0 else None
+        )
+        pct = (
+            delta_t / (1 - t_rec)
+            if delta_t is not None and t_rec is not None and t_rec != 1
+            else None
+        )
+        # Margem informada no cadastro → projeção da margem caso não haja repasse
+        # (a variação de carga é absorvida diretamente pela margem).
+        margem = empresa.margem_lucro_estimada
+        margem_sem_repasse = (
+            margem - delta_t if margem is not None and delta_t is not None else None
+        )
         repasse = {
             "atual_nome": NOMES_REGIME[atual],
             "recomendado_nome": NOMES_REGIME[recomendado],
             "delta_periodo": delta,                       # + imposto sobe; - imposto cai
             "delta_mensal": (delta / n) if n else Decimal("0"),
-            "pct": (delta / faturamento_total) if faturamento_total > 0 else None,
+            "delta_t": delta_t,
+            "pct": pct,                                   # gross-up (% do preço)
             "sentido": "aumento" if delta > 0 else ("reducao" if delta < 0 else "neutro"),
+            "margem": margem,
+            "margem_sem_repasse": margem_sem_repasse,
         }
 
     # Séries para os gráficos (float p/ JSON; None vira gap na linha).

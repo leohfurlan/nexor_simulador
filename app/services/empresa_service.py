@@ -2,11 +2,19 @@
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 
 from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Empresa, LancamentoMensal, Parametros
+from app.utils.numbers import parse_optional_decimal_br
+
+
+def _margem_para_fracao(valor: object) -> Decimal | None:
+    """Margem em PERCENTUAL ('20' ou '20,5') → fração (0.205). Vazio → None."""
+    pct = parse_optional_decimal_br(valor)
+    return None if pct is None else pct / Decimal("100")
 
 
 async def list_empresas(session: AsyncSession, tenant_id: uuid.UUID, query: str = ""):
@@ -35,6 +43,7 @@ async def create_empresa(
     atividade: str | None = None,
     exige_credito_cliente: bool = False,
     regime_atual: str | None = None,
+    margem_lucro_estimada: object = None,
 ) -> Empresa:
     empresa = Empresa(
         tenant_id=tenant_id,
@@ -43,6 +52,7 @@ async def create_empresa(
         atividade=(atividade or "").strip() or None,
         exige_credito_cliente=exige_credito_cliente,
         regime_atual=(regime_atual or "").strip() or None,
+        margem_lucro_estimada=_margem_para_fracao(margem_lucro_estimada),
     )
     session.add(empresa)
     await session.commit()
@@ -60,6 +70,7 @@ async def update_empresa(
     atividade: str | None,
     exige_credito_cliente: bool,
     regime_atual: str | None,
+    margem_lucro_estimada: object = None,
 ) -> Empresa | None:
     empresa = await get_empresa(session, tenant_id, empresa_id)
     if empresa is None:
@@ -69,6 +80,7 @@ async def update_empresa(
     empresa.atividade = (atividade or "").strip() or None
     empresa.exige_credito_cliente = exige_credito_cliente
     empresa.regime_atual = (regime_atual or "").strip() or None
+    empresa.margem_lucro_estimada = _margem_para_fracao(margem_lucro_estimada)
     await session.commit()
     await session.refresh(empresa)
     return empresa

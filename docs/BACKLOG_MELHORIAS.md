@@ -16,13 +16,13 @@ Legenda de status: ✅ concluído · 🔜 próximo · ⏳ pendente
 | 2 | **Sugestão de repasse de preço** — quanto ajustar o preço para manter a margem ao migrar do regime atual para o recomendado. | ✅ | `dashboard_service.build_dashboard`, card no Dashboard |
 | 3 | **Gerar PDF + Copiar resumo** — exportar o resultado para entregar ao cliente. | ✅ | `dashboard/detail.html` (impressão do navegador + resumo em texto) |
 | 4 | **Linha do tempo de transição 2026→2033** — seção didática do phase-in do IBS/CBS, com o ano corrente destacado. | ✅ | `services/reforma.py`, `partials/linha_tempo.html`, Dashboard (e PDF) |
+| 5 | **Margem de lucro estimada (input)** — campo opcional por empresa; refina o repasse (gross-up pela alíquota do novo regime) e projeta a margem sem repasse. | ✅ | `models/empresa.py`, migração `0002`, formulários de empresa, card de repasse |
 
 ## Backlog priorizado (próximas iterações)
 
 | # | Item | Valor | Esforço | Status | Notas |
 |---|---|---|---|---|---|
-| 5 | **Margem de lucro estimada (input)** | Médio | Baixo | 🔜 | Torna o repasse de preço mais preciso (margem líquida alvo em vez de neutralizar só o imposto). |
-| 6 | **Detalhamento PIS/COFINS/ICMS/ISS da carga atual** | Médio | Médio | ⏳ | Hoje o motor destaca CBS/IBS e crédito; decompor os tributos atuais aproxima do comparativo "antes × depois". |
+| 6 | **Detalhamento PIS/COFINS/ICMS/ISS da carga atual** | Médio | Médio | 🔜 | Hoje o motor destaca CBS/IBS e crédito; decompor os tributos atuais aproxima do comparativo "antes × depois". |
 | 7 | **Lucro Real como 5º cenário** | Médio | Médio | ⏳ | Novo regime no motor (`app/calc/engine.py`) + card/coluna no Dashboard. Requer regras de apuração. |
 | 8 | **Seleção de setor (comércio/indústria/serviço) com efeito no cálculo** | Médio | Médio | ⏳ | Hoje `atividade` é livre e não afeta o cálculo; usar para preset de alíquotas por setor. |
 | 9 | **Alíquota ISS/ICMS por município/UF** | Médio | Alto | ⏳ | Tabela de alíquotas por ente + seletor de estado/município; alimenta a carga atual. |

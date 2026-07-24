@@ -102,7 +102,18 @@
       no preço mantendo a margem — vantagem competitiva.
     </p>
     {% endif %}
-    <p class="mt-1 text-xs text-slate-400">Estimativa sobre os tributos (sem honorários), comparada ao regime atual.</p>
+    {% if repasse.margem_sem_repasse is not none %}
+    <p class="mt-2 text-slate-700">
+      Margem estimada: <strong>{{ repasse.margem | pct }}%</strong> →
+      <strong class="{{ 'text-rose-600' if repasse.margem_sem_repasse < 0 else 'text-slate-900' }}">{{ repasse.margem_sem_repasse | pct }}%</strong>
+      sem repasse{% if repasse.margem_sem_repasse < 0 %} — a mudança consumiria toda a margem{% endif %}.
+    </p>
+    {% else %}
+    <p class="mt-2 text-xs text-slate-400">
+      Informe a <a href="/empresas/{{ empresa.id }}" class="underline">margem de lucro estimada</a> no cadastro para ver o impacto na margem.
+    </p>
+    {% endif %}
+    <p class="mt-1 text-xs text-slate-400">Comparado ao regime atual; o repasse considera que o preço maior também é tributado.</p>
   </div>
   {% endif %}
   {% if empresa.exige_credito_cliente %}

@@ -73,6 +73,8 @@ def test_dashboard_tem_repasse_pdf_e_copiar_resumo():
         assert r.status_code == 200
         assert "Sugestão de repasse de preço" in r.text
         assert "folga" in r.text.lower()          # recomendado é mais barato
+        # Sem margem cadastrada: convite a informá-la.
+        assert "para ver o impacto na margem" in r.text
         assert "Gerar PDF" in r.text
         assert "Copiar resumo" in r.text
         assert "const RESUMO" in r.text            # resumo embutido p/ clipboard
@@ -82,6 +84,39 @@ def test_dashboard_tem_repasse_pdf_e_copiar_resumo():
         # Linha do tempo da transição (2026–2033).
         assert "Linha do tempo da Reforma" in r.text
         assert "2033" in r.text and "Reforma plena" in r.text
+
+
+def test_repasse_usa_margem_de_lucro_estimada():
+    """Com margem cadastrada, o repasse projeta a margem sem repasse. Regime
+    recomendado (SN Padrão) reduz a carga → margem projetada sobe."""
+    with TestClient(app) as client:
+        r = client.post(
+            "/empresas",
+            data={"nome": "Margem Co", "regime_atual": "lp_puro",
+                  "margem_lucro_estimada": "20"},
+            follow_redirects=False,
+        )
+        url = r.headers["location"]
+        for comp, fat, desp, das in [
+            ("2026-01", "25716,90", "3000,00", "2110,71"),
+            ("2026-02", "25000,00", "3000,00", "2050,00"),
+        ]:
+            client.post(
+                f"{url}/lancamentos",
+                data={"competencia": comp, "faturamento": fat,
+                      "despesas_com_credito": desp, "das_padrao_apurado": das},
+            )
+        eid = url.rsplit("/", 1)[1]
+
+        # Badge da margem no cadastro.
+        assert "margem 20,00%" in client.get(f"/empresas/{eid}").text
+
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        assert "Margem estimada" in r.text
+        # 20% + queda de carga (~8,35pp) → ~28,35% sem repasse.
+        assert "20,00%" in r.text and "28,35%" in r.text
+        assert "para ver o impacto na margem" not in r.text
 
 
 def test_linha_tempo_marca_ano_atual():
