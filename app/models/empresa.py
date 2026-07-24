@@ -25,6 +25,11 @@ class Empresa(Base):
     nome: Mapped[str] = mapped_column(String(200))
     cnpj: Mapped[str | None] = mapped_column(String(18), nullable=True)
     atividade: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    # Setor de atividade (comercio/industria/servico): define ISS × ICMS na
+    # estimativa da carga atual (pré-reforma). Opcional.
+    setor: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # UF (sigla, ex.: "SP") para estimar a alíquota interna de ICMS. Opcional.
+    uf: Mapped[str | None] = mapped_column(String(2), nullable=True)
     exige_credito_cliente: Mapped[bool] = mapped_column(Boolean, default=False)
     # Chave do regime atual da empresa (sn_padrao/sn_hibrido/lp_puro/lp_credito),
     # base para a "economia anual vs. regime atual" (PRD 7.4). Opcional.

@@ -21,6 +21,10 @@ ALIQUOTA_FIELDS = (
     "aliquota_credito_despesa",
     "aliquota_lucro_presumido",
     "aliquota_lucro_real_irpj_csll",
+    "aliquota_pis",
+    "aliquota_cofins",
+    "aliquota_iss",
+    "aliquota_icms",
 )
 HONORARIO_FIELDS = (
     "honorario_hibrido",

@@ -10,6 +10,7 @@ from __future__ import annotations
 import uuid
 from decimal import Decimal
 
+from app.calc.carga_atual import SETORES, calcular_carga_atual
 from app.calc.engine import (
     LP_CREDITO,
     LP_PURO,
@@ -266,6 +267,38 @@ async def build_dashboard(
             "margem_sem_repasse": margem_sem_repasse,
         }
 
+    # Estimativa da carga atual (pré-reforma) por setor: PIS + COFINS + ICMS/ISS,
+    # contrastada com o IBS/CBS líquido de crédito ("antes × depois"). Só quando o
+    # setor está informado.
+    carga_atual = None
+    if empresa.setor in SETORES:
+        calc_p = params.to_calc()
+        itens = [
+            calcular_carga_atual(r["faturamento"], empresa.setor, calc_p, uf=empresa.uf)
+            for r in rows
+        ]
+        soma = lambda attr: sum((getattr(i, attr) for i in itens), Decimal("0"))
+        total_atual = soma("pis") + soma("cofins") + soma("icms") + soma("iss")
+        # "Depois": IBS/CBS sobre a receita, líquido do crédito das despesas.
+        ibs_cbs = sum((r["cbs"] + r["ibs"] for r in rows), Decimal("0"))
+        credito = sum((r["credito_despesa"] for r in rows), Decimal("0"))
+        reforma = ibs_cbs - credito
+        carga_atual = {
+            "setor_nome": SETORES[empresa.setor],
+            "uf": empresa.uf,
+            "aliquota_est_mun": itens[0].aliquota_estadual_municipal if itens else Decimal("0"),
+            "usa_iss": empresa.setor == "servico",
+            "pis": soma("pis"),
+            "cofins": soma("cofins"),
+            "icms": soma("icms"),
+            "iss": soma("iss"),
+            "total": total_atual,
+            "pct": (total_atual / faturamento_total) if faturamento_total > 0 else None,
+            "reforma": reforma,
+            "reforma_pct": (reforma / faturamento_total) if faturamento_total > 0 else None,
+            "delta": reforma - total_atual,  # + = reforma mais cara
+        }
+
     # Séries para os gráficos (float p/ JSON; None vira gap na linha).
     labels = [_label(r["competencia"]) for r in rows]
     pct_series: dict[str, list] = {}
@@ -312,6 +345,7 @@ async def build_dashboard(
         "recomendado": rec_card,
         "economia": economia,
         "repasse": repasse,
+        "carga_atual": carga_atual,
         "resumo": resumo,
         "linha_tempo": linha_tempo(),
         "n_meses": n,

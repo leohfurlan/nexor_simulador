@@ -44,6 +44,8 @@ async def create_empresa(
     exige_credito_cliente: bool = False,
     regime_atual: str | None = None,
     margem_lucro_estimada: object = None,
+    setor: str | None = None,
+    uf: str | None = None,
 ) -> Empresa:
     empresa = Empresa(
         tenant_id=tenant_id,
@@ -53,6 +55,8 @@ async def create_empresa(
         exige_credito_cliente=exige_credito_cliente,
         regime_atual=(regime_atual or "").strip() or None,
         margem_lucro_estimada=_margem_para_fracao(margem_lucro_estimada),
+        setor=(setor or "").strip() or None,
+        uf=((uf or "").strip().upper() or None),
     )
     session.add(empresa)
     await session.commit()
@@ -71,6 +75,8 @@ async def update_empresa(
     exige_credito_cliente: bool,
     regime_atual: str | None,
     margem_lucro_estimada: object = None,
+    setor: str | None = None,
+    uf: str | None = None,
 ) -> Empresa | None:
     empresa = await get_empresa(session, tenant_id, empresa_id)
     if empresa is None:
@@ -81,6 +87,8 @@ async def update_empresa(
     empresa.exige_credito_cliente = exige_credito_cliente
     empresa.regime_atual = (regime_atual or "").strip() or None
     empresa.margem_lucro_estimada = _margem_para_fracao(margem_lucro_estimada)
+    empresa.setor = (setor or "").strip() or None
+    empresa.uf = (uf or "").strip().upper() or None
     await session.commit()
     await session.refresh(empresa)
     return empresa

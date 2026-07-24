@@ -18,15 +18,15 @@ Legenda de status: ✅ concluído · 🔜 próximo · ⏳ pendente
 | 4 | **Linha do tempo de transição 2026→2033** — seção didática do phase-in do IBS/CBS, com o ano corrente destacado. | ✅ | `services/reforma.py`, `partials/linha_tempo.html`, Dashboard (e PDF) |
 | 5 | **Margem de lucro estimada (input)** — campo opcional por empresa; refina o repasse (gross-up pela alíquota do novo regime) e projeta a margem sem repasse. | ✅ | `models/empresa.py`, migração `0002`, formulários de empresa, card de repasse |
 | 7 | **Lucro Real (5º cenário)** — IRPJ/CSLL sobre o lucro estimado + IBS/CBS com crédito; disponível quando a margem é informada. | ✅ | `calc/engine.py`, `calc/params.py`, migração `0003`, Configurações, Dashboard |
+| 8 | **Setor (comércio/indústria/serviço) com efeito no cálculo** — define ISS×ICMS na carga atual. | ✅ | `models/empresa.py` (`setor`), formulários, migração `0004` |
+| 9 | **Alíquota ISS/ICMS por UF** — tabela de referência de ICMS por UF + ISS/ICMS padrão configuráveis. | ✅ | `calc/tributos_uf.py`, `models/empresa.py` (`uf`), Configurações |
+| 6 | **Detalhamento PIS/COFINS/ICMS/ISS da carga atual** — painel "antes × depois" decompondo a carga pré-reforma. | ✅ | `calc/carga_atual.py`, `partials/carga_atual.html`, Dashboard |
 
 ## Backlog priorizado (próximas iterações)
 
 | # | Item | Valor | Esforço | Status | Notas |
 |---|---|---|---|---|---|
-| 8 | **Seleção de setor (comércio/indústria/serviço) com efeito no cálculo** | Médio | Médio | 🔜 | Hoje `atividade` é livre e não afeta o cálculo; usar para definir ISS×ICMS e o preset por setor. |
-| 6 | **Detalhamento PIS/COFINS/ICMS/ISS da carga atual** | Médio | Médio | ⏳ | Hoje o motor destaca CBS/IBS e crédito; decompor os tributos atuais aproxima do comparativo "antes × depois". |
-| 9 | **Alíquota ISS/ICMS por município/UF** | Médio | Alto | ⏳ | Tabela de alíquotas por ente + seletor de estado/município; alimenta a carga atual. |
-| 10 | **UX reativa (split view + cálculo em tempo real)** | Alto | Alto | ⏳ | Painel de inputs à esquerda e resultados reativos à direita, sem reload (HTMX incremental ou front dedicado). |
+| 10 | **UX reativa (split view + cálculo em tempo real)** | Alto | Alto | 🔜 | Painel de inputs à esquerda e resultados reativos à direita, sem reload (HTMX incremental ou front dedicado). |
 
 ## Convenções
 

@@ -39,6 +39,12 @@ class Parametros(Base):
     aliquota_lucro_presumido: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.16550"))
     aliquota_lucro_real_irpj_csll: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.34000"))
 
+    # Estimativa da carga atual (pré-reforma).
+    aliquota_pis: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.00650"))
+    aliquota_cofins: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.03000"))
+    aliquota_iss: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.05000"))
+    aliquota_icms: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.18000"))
+
     honorario_hibrido: Mapped[Decimal] = mapped_column(_MOEDA, default=Decimal("550.00"))
     honorario_padrao: Mapped[Decimal] = mapped_column(_MOEDA, default=Decimal("350.00"))
     honorario_lucro_presumido: Mapped[Decimal] = mapped_column(_MOEDA, default=Decimal("750.00"))
@@ -57,6 +63,10 @@ class Parametros(Base):
             aliquota_credito_despesa=self.aliquota_credito_despesa,
             aliquota_lucro_presumido=self.aliquota_lucro_presumido,
             aliquota_lucro_real_irpj_csll=self.aliquota_lucro_real_irpj_csll,
+            aliquota_pis=self.aliquota_pis,
+            aliquota_cofins=self.aliquota_cofins,
+            aliquota_iss=self.aliquota_iss,
+            aliquota_icms=self.aliquota_icms,
             honorario_hibrido=self.honorario_hibrido,
             honorario_padrao=self.honorario_padrao,
             honorario_lucro_presumido=self.honorario_lucro_presumido,

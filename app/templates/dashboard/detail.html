@@ -168,6 +168,9 @@
   </div>
 </section>
 
+<!-- Carga atual (pré-reforma) estimada por setor -->
+{% if carga_atual %}{% include "partials/carga_atual.html" %}{% endif %}
+
 <!-- Linha do tempo da transição da Reforma -->
 {% include "partials/linha_tempo.html" %}
 

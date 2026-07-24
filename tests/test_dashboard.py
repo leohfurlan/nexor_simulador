@@ -135,6 +135,31 @@ def test_lucro_real_indisponivel_sem_margem():
         assert "informe" in r.text.lower()
 
 
+def test_dashboard_mostra_carga_atual_por_setor():
+    """Com setor informado, o Dashboard exibe a estimativa da carga atual e o
+    comparativo antes × depois."""
+    with TestClient(app) as client:
+        r = client.post(
+            "/empresas",
+            data={"nome": "Setor Co", "regime_atual": "lp_puro",
+                  "setor": "comercio", "uf": "SP"},
+            follow_redirects=False,
+        )
+        url = r.headers["location"]
+        client.post(
+            f"{url}/lancamentos",
+            data={"competencia": "2026-01", "faturamento": "10000,00",
+                  "despesas_com_credito": "0,00", "das_padrao_apurado": "800,00"},
+        )
+        eid = url.rsplit("/", 1)[1]
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        assert "Carga atual (pré-reforma) estimada" in r.text
+        assert "Comércio" in r.text and "ICMS" in r.text
+        assert "Antes × depois" in r.text
+        assert "1.800,00" in r.text  # ICMS SP 18% de 10.000
+
+
 def test_linha_tempo_marca_ano_atual():
     import datetime as dt
 

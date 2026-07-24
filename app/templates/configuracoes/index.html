@@ -26,6 +26,10 @@
         ('aliquota_credito_despesa', 'Crédito sobre despesas', 'Percentual de crédito gerado pelas despesas.'),
         ('aliquota_lucro_presumido', 'Lucro Presumido', 'IRPJ + CSLL + IBS/CBS do Lucro Presumido.'),
         ('aliquota_lucro_real_irpj_csll', 'Lucro Real (IRPJ+CSLL)', 'IRPJ + adicional + CSLL sobre o lucro estimado (Lucro Real).'),
+        ('aliquota_pis', 'PIS (carga atual)', 'PIS cumulativo na estimativa da carga atual (pré-reforma).'),
+        ('aliquota_cofins', 'COFINS (carga atual)', 'COFINS cumulativa na estimativa da carga atual (pré-reforma).'),
+        ('aliquota_iss', 'ISS (serviços)', 'ISS típico usado na carga atual de serviços.'),
+        ('aliquota_icms', 'ICMS padrão', 'Alíquota interna de ICMS quando a UF não é informada.'),
       ] %}
       {% for campo, rotulo, ajuda in aliq %}
       <label class="block">

@@ -35,6 +35,21 @@
       <input name="atividade" value="{{ empresa.atividade or '' }}" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
     </label>
     <label class="block">
+      <span class="text-sm font-medium text-slate-700">Setor</span>
+      <select name="setor" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
+        <option value="">— não informado —</option>
+        {% for chave, rotulo in setores %}<option value="{{ chave }}" {{ 'selected' if empresa.setor == chave else '' }}>{{ rotulo }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">UF</span>
+      <span class="block text-xs text-slate-400">Estima o ICMS na carga atual (comércio/indústria).</span>
+      <select name="uf" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
+        <option value="">—</option>
+        {% for sigla in ufs %}<option value="{{ sigla }}" {{ 'selected' if empresa.uf == sigla else '' }}>{{ sigla }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="block">
       <span class="text-sm font-medium text-slate-700">Regime atual</span>
       <select name="regime_atual" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
         <option value="">— não informado —</option>
