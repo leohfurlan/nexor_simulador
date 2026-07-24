@@ -117,6 +117,22 @@ def test_repasse_usa_margem_de_lucro_estimada():
         # 20% + queda de carga (~8,35pp) → ~28,35% sem repasse.
         assert "20,00%" in r.text and "28,35%" in r.text
         assert "para ver o impacto na margem" not in r.text
+        # Com margem, o Lucro Real passa a ser comparável (card presente).
+        assert "Lucro Real" in r.text
+
+
+def test_lucro_real_indisponivel_sem_margem():
+    """Sem margem cadastrada, o Lucro Real aparece como indisponível (—),
+    não distorcendo a recomendação."""
+    with TestClient(app) as client:
+        eid = _empresa(client, "Sem Margem Co", [
+            ("2026-01", "25716,90", "3000,00", "2110,71"),
+        ])
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        assert "Lucro Real" in r.text  # card existe
+        # marcado como indisponível por falta de margem
+        assert "informe" in r.text.lower()
 
 
 def test_linha_tempo_marca_ano_atual():

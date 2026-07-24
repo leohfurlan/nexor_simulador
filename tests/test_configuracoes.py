@@ -24,9 +24,11 @@ _FORM = {
     "aliquota_hibrido_total": "16.30",
     "aliquota_credito_despesa": "27.00",
     "aliquota_lucro_presumido": "16.55",
+    "aliquota_lucro_real_irpj_csll": "34.00",
     "honorario_hibrido": "550.00",
     "honorario_padrao": "350.00",
     "honorario_lucro_presumido": "750.00",
+    "honorario_lucro_real": "900.00",
 }
 
 

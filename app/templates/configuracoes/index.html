@@ -25,6 +25,7 @@
         ('aliquota_hibrido_total', 'SN Híbrido (bruto)', 'Imposto bruto do Simples Nacional Híbrido.'),
         ('aliquota_credito_despesa', 'Crédito sobre despesas', 'Percentual de crédito gerado pelas despesas.'),
         ('aliquota_lucro_presumido', 'Lucro Presumido', 'IRPJ + CSLL + IBS/CBS do Lucro Presumido.'),
+        ('aliquota_lucro_real_irpj_csll', 'Lucro Real (IRPJ+CSLL)', 'IRPJ + adicional + CSLL sobre o lucro estimado (Lucro Real).'),
       ] %}
       {% for campo, rotulo, ajuda in aliq %}
       <label class="block">
@@ -49,6 +50,7 @@
         ('honorario_hibrido', 'SN Híbrido'),
         ('honorario_padrao', 'SN Padrão'),
         ('honorario_lucro_presumido', 'Lucro Presumido'),
+        ('honorario_lucro_real', 'Lucro Real'),
       ] %}
       {% for campo, rotulo in hon %}
       <label class="block">

@@ -13,6 +13,7 @@ from decimal import Decimal
 from app.calc.engine import (
     LP_CREDITO,
     LP_PURO,
+    LP_REAL,
     NOMES_REGIME,
     SN_HIBRIDO,
     SN_PADRAO,
@@ -22,12 +23,13 @@ from app.services.lancamento_service import compute_rows
 from app.services.parametros_service import get_or_create_parametros
 from app.services.reforma import linha_tempo
 
-REGIME_ORDER = (SN_PADRAO, SN_HIBRIDO, LP_PURO, LP_CREDITO)
+REGIME_ORDER = (SN_PADRAO, SN_HIBRIDO, LP_PURO, LP_CREDITO, LP_REAL)
 REGIME_CORES = {
     SN_PADRAO: "#008300",   # verde
     SN_HIBRIDO: "#2a78d6",  # azul
     LP_PURO: "#eb6834",     # laranja
     LP_CREDITO: "#4a3aa7",  # violeta
+    LP_REAL: "#c026a3",     # magenta
 }
 
 _MESES_ABREV = {
@@ -160,7 +162,10 @@ async def build_dashboard(
         SN_HIBRIDO: params.honorario_hibrido,
         LP_PURO: params.honorario_lucro_presumido,
         LP_CREDITO: params.honorario_lucro_presumido,
+        LP_REAL: params.honorario_lucro_real,
     }
+    # Lucro Real depende da margem de lucro informada no cadastro.
+    margem_ok = empresa.margem_lucro_estimada is not None
     faturamento_total = sum((r["faturamento"] for r in rows), Decimal("0"))
     # SN Padrão entra no acumulado quando o DAS foi informado em todos os meses
     # COM movimento (faturamento > 0). Meses sem movimento não exigem DAS: tanto
@@ -184,7 +189,12 @@ async def build_dashboard(
     for chave in REGIME_ORDER:
         imposto_total = sum((_reg(r, chave)["imposto"] for r in rows), Decimal("0"))
         honorario_total = honorarios[chave] * n
-        disponivel = sn_padrao_ok if chave == SN_PADRAO else True
+        if chave == SN_PADRAO:
+            disponivel = sn_padrao_ok
+        elif chave == LP_REAL:
+            disponivel = margem_ok
+        else:
+            disponivel = True
         agg[chave] = {
             "chave": chave,
             "nome": NOMES_REGIME[chave],

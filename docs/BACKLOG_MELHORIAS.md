@@ -17,14 +17,14 @@ Legenda de status: ✅ concluído · 🔜 próximo · ⏳ pendente
 | 3 | **Gerar PDF + Copiar resumo** — exportar o resultado para entregar ao cliente. | ✅ | `dashboard/detail.html` (impressão do navegador + resumo em texto) |
 | 4 | **Linha do tempo de transição 2026→2033** — seção didática do phase-in do IBS/CBS, com o ano corrente destacado. | ✅ | `services/reforma.py`, `partials/linha_tempo.html`, Dashboard (e PDF) |
 | 5 | **Margem de lucro estimada (input)** — campo opcional por empresa; refina o repasse (gross-up pela alíquota do novo regime) e projeta a margem sem repasse. | ✅ | `models/empresa.py`, migração `0002`, formulários de empresa, card de repasse |
+| 7 | **Lucro Real (5º cenário)** — IRPJ/CSLL sobre o lucro estimado + IBS/CBS com crédito; disponível quando a margem é informada. | ✅ | `calc/engine.py`, `calc/params.py`, migração `0003`, Configurações, Dashboard |
 
 ## Backlog priorizado (próximas iterações)
 
 | # | Item | Valor | Esforço | Status | Notas |
 |---|---|---|---|---|---|
-| 6 | **Detalhamento PIS/COFINS/ICMS/ISS da carga atual** | Médio | Médio | 🔜 | Hoje o motor destaca CBS/IBS e crédito; decompor os tributos atuais aproxima do comparativo "antes × depois". |
-| 7 | **Lucro Real como 5º cenário** | Médio | Médio | ⏳ | Novo regime no motor (`app/calc/engine.py`) + card/coluna no Dashboard. Requer regras de apuração. |
-| 8 | **Seleção de setor (comércio/indústria/serviço) com efeito no cálculo** | Médio | Médio | ⏳ | Hoje `atividade` é livre e não afeta o cálculo; usar para preset de alíquotas por setor. |
+| 8 | **Seleção de setor (comércio/indústria/serviço) com efeito no cálculo** | Médio | Médio | 🔜 | Hoje `atividade` é livre e não afeta o cálculo; usar para definir ISS×ICMS e o preset por setor. |
+| 6 | **Detalhamento PIS/COFINS/ICMS/ISS da carga atual** | Médio | Médio | ⏳ | Hoje o motor destaca CBS/IBS e crédito; decompor os tributos atuais aproxima do comparativo "antes × depois". |
 | 9 | **Alíquota ISS/ICMS por município/UF** | Médio | Alto | ⏳ | Tabela de alíquotas por ente + seletor de estado/município; alimenta a carga atual. |
 | 10 | **UX reativa (split view + cálculo em tempo real)** | Alto | Alto | ⏳ | Painel de inputs à esquerda e resultados reativos à direita, sem reload (HTMX incremental ou front dedicado). |
 

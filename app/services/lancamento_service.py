@@ -16,14 +16,21 @@ import uuid
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.calc.engine import LP_CREDITO, LP_PURO, SN_HIBRIDO, SN_PADRAO, calcular_lancamento
+from app.calc.engine import (
+    LP_CREDITO,
+    LP_PURO,
+    LP_REAL,
+    SN_HIBRIDO,
+    SN_PADRAO,
+    calcular_lancamento,
+)
 from app.calc.recommend import recomendar
 from app.models import Empresa, LancamentoMensal
 from app.services.parametros_service import get_or_create_parametros
 from app.utils.numbers import parse_money_default_zero, parse_optional_decimal_br
 
 # Ordem das colunas de regime na tabela.
-_COLS = (SN_PADRAO, SN_HIBRIDO, LP_PURO, LP_CREDITO)
+_COLS = (SN_PADRAO, SN_HIBRIDO, LP_PURO, LP_CREDITO, LP_REAL)
 
 # Sentinela: distingue "não passar rbt12" (edição manual) de "definir rbt12" (import).
 _UNSET = object()
@@ -143,15 +150,31 @@ async def delete_lancamento(
     return result.rowcount > 0
 
 
-def _row_view(lanc: LancamentoMensal, calc_params, exige_credito_cliente: bool) -> dict:
+def _row_view(
+    lanc: LancamentoMensal, calc_params, exige_credito_cliente: bool, margem=None
+) -> dict:
     """Calcula uma linha e monta a estrutura consumida pelo template."""
     das_informado = lanc.das_padrao_apurado is not None
+    margem_informada = margem is not None
     calc = calcular_lancamento(
-        lanc.faturamento, lanc.despesas_com_credito, lanc.das_padrao_apurado, calc_params
+        lanc.faturamento, lanc.despesas_com_credito, lanc.das_padrao_apurado,
+        calc_params, margem=margem,
     )
-    # SN Padrão só entra na recomendação quando o DAS do mês foi informado.
-    excluir = None if das_informado else {SN_PADRAO}
-    rec = recomendar(calc, exige_credito_cliente, excluir=excluir)
+    # Regimes indisponíveis por falta de dado: SN Padrão sem DAS, Lucro Real sem
+    # margem de lucro informada.
+    excluir = set()
+    if not das_informado:
+        excluir.add(SN_PADRAO)
+    if not margem_informada:
+        excluir.add(LP_REAL)
+    rec = recomendar(calc, exige_credito_cliente, excluir=excluir or None)
+
+    def _disponivel(chave: str) -> bool:
+        if chave == SN_PADRAO:
+            return das_informado
+        if chave == LP_REAL:
+            return margem_informada
+        return True
 
     regimes = []
     for chave in _COLS:
@@ -161,7 +184,7 @@ def _row_view(lanc: LancamentoMensal, calc_params, exige_credito_cliente: bool) 
                 "chave": chave,
                 "imposto": r.imposto,
                 "pct": r.pct_efetivo,
-                "disponivel": das_informado if chave == SN_PADRAO else True,
+                "disponivel": _disponivel(chave),
             }
         )
     return {
@@ -186,7 +209,11 @@ async def compute_rows(
     params = await get_or_create_parametros(session, tenant_id)
     calc_params = params.to_calc()
     lancs = await list_lancamentos(session, tenant_id, empresa.id)
-    return [_row_view(lanc, calc_params, empresa.exige_credito_cliente) for lanc in lancs]
+    return [
+        _row_view(lanc, calc_params, empresa.exige_credito_cliente,
+                  margem=empresa.margem_lucro_estimada)
+        for lanc in lancs
+    ]
 
 
 # --- Import CSV / XLSX ------------------------------------------------------

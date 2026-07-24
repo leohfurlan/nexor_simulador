@@ -37,10 +37,12 @@ class Parametros(Base):
     aliquota_hibrido_total: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.16300"))
     aliquota_credito_despesa: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.27000"))
     aliquota_lucro_presumido: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.16550"))
+    aliquota_lucro_real_irpj_csll: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.34000"))
 
     honorario_hibrido: Mapped[Decimal] = mapped_column(_MOEDA, default=Decimal("550.00"))
     honorario_padrao: Mapped[Decimal] = mapped_column(_MOEDA, default=Decimal("350.00"))
     honorario_lucro_presumido: Mapped[Decimal] = mapped_column(_MOEDA, default=Decimal("750.00"))
+    honorario_lucro_real: Mapped[Decimal] = mapped_column(_MOEDA, default=Decimal("900.00"))
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -54,7 +56,9 @@ class Parametros(Base):
             aliquota_hibrido_total=self.aliquota_hibrido_total,
             aliquota_credito_despesa=self.aliquota_credito_despesa,
             aliquota_lucro_presumido=self.aliquota_lucro_presumido,
+            aliquota_lucro_real_irpj_csll=self.aliquota_lucro_real_irpj_csll,
             honorario_hibrido=self.honorario_hibrido,
             honorario_padrao=self.honorario_padrao,
             honorario_lucro_presumido=self.honorario_lucro_presumido,
+            honorario_lucro_real=self.honorario_lucro_real,
         )
