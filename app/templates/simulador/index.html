@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Simulação rápida · Nexor Simulador{% endblock %}
+
+{% block content %}
+<header class="mb-6">
+  <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Reforma Tributária · IBS/CBS</p>
+  <h1 class="mt-1 text-2xl font-semibold text-slate-900">Simulação rápida</h1>
+  <p class="mt-2 max-w-2xl text-sm text-slate-600">
+    Estime o impacto na hora, sem cadastrar a empresa. Preencha os campos e o
+    resultado é recalculado automaticamente. Para acompanhar mês a mês, use
+    <a href="/empresas" class="font-medium text-slate-900 underline">Empresas</a> e o
+    <a href="/dashboard" class="font-medium text-slate-900 underline">Dashboard</a>.
+  </p>
+</header>
+
+{% include "partials/aviso_aliquotas.html" %}
+
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+  <!-- Coluna de inputs -->
+  <form hx-post="/simular" hx-target="#resultado" hx-swap="innerHTML"
+        hx-trigger="change, keyup changed delay:400ms"
+        class="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Setor</span>
+      <select name="setor" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
+        <option value="">— não informado —</option>
+        {% for chave, rotulo in setores %}<option value="{{ chave }}">{{ rotulo }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Regime atual</span>
+      <select name="regime_atual" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
+        <option value="">— não informado —</option>
+        {% for chave, rotulo in regimes %}<option value="{{ chave }}">{{ rotulo }}</option>{% endfor %}
+      </select>
+    </label>
+    <div class="grid grid-cols-2 gap-4">
+      <label class="block">
+        <span class="text-sm font-medium text-slate-700">Faturamento mensal</span>
+        <div class="mt-1 flex items-center">
+          <span class="mr-2 text-sm text-slate-400">R$</span>
+          <input name="faturamento" inputmode="decimal" placeholder="98.000,00" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+        </div>
+      </label>
+      <label class="block">
+        <span class="text-sm font-medium text-slate-700">UF</span>
+        <select name="uf" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
+          <option value="">—</option>
+          {% for sigla in ufs %}<option value="{{ sigla }}">{{ sigla }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <label class="block">
+        <span class="text-sm font-medium text-slate-700">Despesas com crédito</span>
+        <div class="mt-1 flex items-center">
+          <span class="mr-2 text-sm text-slate-400">R$</span>
+          <input name="despesas_com_credito" inputmode="decimal" placeholder="0,00" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+        </div>
+      </label>
+      <label class="block">
+        <span class="text-sm font-medium text-slate-700">Margem de lucro</span>
+        <div class="mt-1 flex items-center">
+          <input name="margem_pct" inputmode="decimal" placeholder="20" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+          <span class="ml-2 text-sm text-slate-400">%</span>
+        </div>
+      </label>
+    </div>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">DAS Padrão apurado</span>
+      <span class="block text-xs text-slate-400">Opcional — necessário para comparar o Simples Nacional Padrão.</span>
+      <div class="mt-1 flex items-center">
+        <span class="mr-2 text-sm text-slate-400">R$</span>
+        <input name="das_padrao_apurado" inputmode="decimal" placeholder="0,00" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
+      </div>
+    </label>
+    <label class="flex items-center gap-2">
+      <input type="checkbox" name="exige_credito_cliente" value="1" class="h-4 w-4 rounded border-slate-300" />
+      <span class="text-sm text-slate-700">O cliente exige crédito de IBS/CBS (B2B)</span>
+    </label>
+    <p class="text-xs text-slate-400">As alíquotas usadas vêm de <a href="/configuracoes" class="underline">Configurações</a>.</p>
+  </form>
+
+  <!-- Coluna de resultados (reativa) -->
+  <div id="resultado" aria-live="polite">
+    {% include "simulador/partials/vazio.html" %}
+  </div>
+</div>
+{% endblock %}

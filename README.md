@@ -14,12 +14,20 @@ para clientes B2B.
 - Cadastro, edição, busca e exclusão de empresas.
 - Lançamentos mensais de faturamento, despesas com crédito e DAS apurado.
 - Importação de lançamentos por CSV e Excel.
-- Cálculo de Simples Nacional Padrão, Simples Nacional Híbrido, Lucro Presumido
-  e Lucro Presumido com crédito de IBS/CBS.
+- Cálculo de Simples Nacional Padrão, Simples Nacional Híbrido, Lucro Presumido,
+  Lucro Presumido com crédito de IBS/CBS e Lucro Real (5º cenário, quando a
+  margem de lucro é informada).
 - Recomendação por menor custo total, com exclusão do Simples Nacional Padrão
   quando o cliente B2B exige aproveitamento de crédito.
-- Dashboard acumulado com quatro cards, economia anual estimada, dois gráficos
-  e tabela detalhada.
+- Dashboard acumulado com cards por regime, economia anual estimada, dois
+  gráficos e tabela detalhada.
+- Sugestão de repasse de preço (com gross-up e impacto na margem) ao migrar do
+  regime atual para o recomendado.
+- Estimativa da carga atual (pré-reforma) por setor/UF com comparativo
+  "antes × depois" (PIS/COFINS/ICMS/ISS × IBS/CBS).
+- Linha do tempo da transição 2026→2033 e banner de alíquotas provisórias.
+- Exportação do resultado: gerar PDF (impressão) e copiar resumo.
+- Simulação rápida avulsa (sem cadastro), com cálculo reativo em tempo real.
 - Configuração de alíquotas e honorários por tenant.
 - Referência visual das categorias de despesas que geram crédito.
 
@@ -140,6 +148,7 @@ Acesse:
 - Aplicação: `http://127.0.0.1:8000/`
 - Empresas: `http://127.0.0.1:8000/empresas`
 - Dashboard: `http://127.0.0.1:8000/dashboard`
+- Simulação rápida: `http://127.0.0.1:8000/simular`
 - Referência de créditos: `http://127.0.0.1:8000/referencia`
 - Configurações: `http://127.0.0.1:8000/configuracoes`
 - OpenAPI em modo debug: `http://127.0.0.1:8000/api/docs`

@@ -21,12 +21,17 @@ Legenda de status: ✅ concluído · 🔜 próximo · ⏳ pendente
 | 8 | **Setor (comércio/indústria/serviço) com efeito no cálculo** — define ISS×ICMS na carga atual. | ✅ | `models/empresa.py` (`setor`), formulários, migração `0004` |
 | 9 | **Alíquota ISS/ICMS por UF** — tabela de referência de ICMS por UF + ISS/ICMS padrão configuráveis. | ✅ | `calc/tributos_uf.py`, `models/empresa.py` (`uf`), Configurações |
 | 6 | **Detalhamento PIS/COFINS/ICMS/ISS da carga atual** — painel "antes × depois" decompondo a carga pré-reforma. | ✅ | `calc/carga_atual.py`, `partials/carga_atual.html`, Dashboard |
+| 10 | **UX reativa (split view + cálculo em tempo real)** — página "Simulação rápida" com inputs à esquerda e resultado recalculado via HTMX, sem persistência. | ✅ | `routers/simulador.py`, `services/simulacao_service.py`, `templates/simulador/` |
 
-## Backlog priorizado (próximas iterações)
+## Backlog concluído
+
+Todos os itens 1–10 foram entregues nesta série de iterações. Próximas
+oportunidades (fora do escopo original) ficam registradas abaixo conforme
+surgirem.
 
 | # | Item | Valor | Esforço | Status | Notas |
 |---|---|---|---|---|---|
-| 10 | **UX reativa (split view + cálculo em tempo real)** | Alto | Alto | 🔜 | Painel de inputs à esquerda e resultados reativos à direita, sem reload (HTMX incremental ou front dedicado). |
+| — | (nenhum pendente) | — | — | — | Backlog inicial concluído. |
 
 ## Convenções
 

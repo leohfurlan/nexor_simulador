@@ -14,7 +14,14 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.integrations import nexor_fiscal
-from app.routers import clientes, configuracoes, dashboard, empresas, referencia
+from app.routers import (
+    clientes,
+    configuracoes,
+    dashboard,
+    empresas,
+    referencia,
+    simulador,
+)
 from app.seeds import init_models, seed_all
 from app.utils.templates import templates
 
@@ -41,6 +48,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(clientes.router)
 app.include_router(empresas.router)
 app.include_router(dashboard.router)
+app.include_router(simulador.router)
 app.include_router(referencia.router)
 app.include_router(configuracoes.router)
 
