@@ -20,6 +20,7 @@ ALIQUOTA_FIELDS = (
     "aliquota_hibrido_total",
     "aliquota_credito_despesa",
     "aliquota_lucro_presumido",
+    "aliquota_lucro_presumido_ibs_cbs",
     "aliquota_lucro_real_irpj_csll",
     "aliquota_pis",
     "aliquota_cofins",

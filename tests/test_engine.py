@@ -38,8 +38,8 @@ def test_caso_referencia_impostos():
     r = _resultado_ref()
     assert r.regimes[SN_PADRAO].imposto == Decimal("2110.71")
     assert r.regimes[SN_HIBRIDO].imposto == Decimal("3381.85")
-    assert r.regimes[LP_CREDITO].imposto == Decimal("3446.15")
-    assert r.regimes[LP_PURO].imposto == Decimal("4256.15")
+    assert r.regimes[LP_CREDITO].imposto == Decimal("9561.62")
+    assert r.regimes[LP_PURO].imposto == Decimal("3428.06")
 
 
 def test_caso_referencia_percentuais():
@@ -50,8 +50,8 @@ def test_caso_referencia_percentuais():
 
     assert pct(SN_PADRAO) == Decimal("0.0821")   # 8,21%
     assert pct(SN_HIBRIDO) == Decimal("0.1315")  # 13,15%
-    assert pct(LP_CREDITO) == Decimal("0.1340")  # 13,40%
-    assert pct(LP_PURO) == Decimal("0.1655")     # 16,55%
+    assert pct(LP_CREDITO) == Decimal("0.3718")  # 37,18%
+    assert pct(LP_PURO) == Decimal("0.1333")     # 13,33%
 
 
 # --- Lucro Real (5º cenário, depende da margem) ------------------------------
@@ -93,14 +93,14 @@ def test_parametros_sao_injetados():
     custom = calcular_lancamento(
         "1000", "0", "0", Parametros(aliquota_lucro_presumido=Decimal("0.20"))
     )
-    assert base.regimes[LP_PURO].imposto == Decimal("165.50")   # 1000 * 16,55%
+    assert base.regimes[LP_PURO].imposto == Decimal("133.30")   # 1000 * 13,33%
     assert custom.regimes[LP_PURO].imposto == Decimal("200.00")  # 1000 * 20%
 
 
 # --- Recomendação (PRD seção 7) ----------------------------------------------
 
 def test_recomendacao_menor_custo_total():
-    # custo total: padrão 2.460,71 | híbrido 3.931,85 | lp_cred 4.196,15 | lp 5.006,15
+    # custo total: padrão 2.460,71 | híbrido 3.931,85 | lp 4.178,06 | lp_cred 10.311,62
     # Lucro Real fora: o caso de referência não informa margem.
     rec = recomendar(_resultado_ref(), exige_credito_cliente=False, excluir={LP_REAL})
     assert rec.regime.chave == SN_PADRAO

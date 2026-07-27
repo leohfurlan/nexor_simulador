@@ -18,7 +18,8 @@ class Parametros:
     aliquota_ibs: Decimal = Decimal("0.088")            # IBS destacada
     aliquota_hibrido_total: Decimal = Decimal("0.163")  # Imposto bruto SN Híbrido
     aliquota_credito_despesa: Decimal = Decimal("0.27")  # Crédito gerado por despesas
-    aliquota_lucro_presumido: Decimal = Decimal("0.1655")  # IRPJ+CSLL+IBS/CBS
+    aliquota_lucro_presumido: Decimal = Decimal("0.1333")  # IRPJ+CSLL+PIS+COFINS+ISS (Lucro Presumido puro, hoje)
+    aliquota_lucro_presumido_ibs_cbs: Decimal = Decimal("0.27")  # IBS/CBS do Lucro Presumido c/ crédito
     aliquota_lucro_real_irpj_csll: Decimal = Decimal("0.34")  # IRPJ+adic.+CSLL s/ lucro
 
     # Estimativa da carga atual (pré-reforma) sobre a receita — referência para

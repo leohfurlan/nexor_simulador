@@ -114,8 +114,8 @@ def test_repasse_usa_margem_de_lucro_estimada():
         r = client.get(f"/dashboard/{eid}")
         assert r.status_code == 200
         assert "Margem estimada" in r.text
-        # 20% + queda de carga (~8,35pp) → ~28,35% sem repasse.
-        assert "20,00%" in r.text and "28,35%" in r.text
+        # 20% + queda de carga (~5,13pp) → ~25,13% sem repasse.
+        assert "20,00%" in r.text and "25,13%" in r.text
         assert "para ver o impacto na margem" not in r.text
         # Com margem, o Lucro Real passa a ser comparável (card presente).
         assert "Lucro Real" in r.text

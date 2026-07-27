@@ -57,7 +57,7 @@ def test_fluxo_empresa_e_lancamentos():
         assert r.status_code == 200
         assert "2.110,71" in r.text   # SN Padrão
         assert "3.381,85" in r.text   # SN Híbrido
-        assert "4.256,15" in r.text   # LP puro
+        assert "3.428,06" in r.text   # LP puro
 
         # Sem DAS → SN Padrão indisponível ("—") para aquele mês
         r = client.post(
@@ -130,4 +130,4 @@ def test_import_xlsx_com_cabecalhos_reais():
         assert r.status_code == 200
         assert "2 competência" in r.text   # jun (zerado) foi ignorado
         assert "da aba" in r.text
-        assert "3.310,00" in r.text         # LP calculado (20000×16,55%), pt-BR
+        assert "2.666,00" in r.text         # LP calculado (20000×13,33%), pt-BR

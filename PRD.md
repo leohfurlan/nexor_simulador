@@ -35,7 +35,8 @@ Aplicação web que recebe **faturamento** e **despesas com crédito** de uma em
 | `aliquota_ibs` | 8,8% | IBS destacada |
 | `aliquota_hibrido_total` | 16,3% | Imposto bruto do SN Híbrido |
 | `aliquota_credito_despesa` | 27% | Crédito gerado pelas despesas |
-| `aliquota_lucro_presumido` | 16,55% | IRPJ 4,8% + CSLL 2,88% + IBS/CBS |
+| `aliquota_lucro_presumido` | 13,33% | IRPJ+CSLL+PIS+COFINS+ISS do Lucro Presumido puro, hoje (sem IBS/CBS) |
+| `aliquota_lucro_presumido_ibs_cbs` | 27% | IBS/CBS somado no Lucro Presumido c/ crédito |
 | `honorario_hibrido` | 550 | Custo mensal do regime |
 | `honorario_padrao` | 350 | Custo mensal do regime |
 | `honorario_lucro_presumido` | 750 | Custo mensal do regime |
@@ -83,12 +84,13 @@ hibrido_pct          = hibrido_liquido / F
 padrao_valor         = das_padrao_apurado                      # input
 padrao_pct           = padrao_valor / F
 
-# ③ Lucro Presumido
-lp_valor             = F * aliquota_lucro_presumido            # F * 16,55%
+# ③ Lucro Presumido (puro, sem IBS/CBS)
+lp_valor             = F * aliquota_lucro_presumido            # F * 13,33%
 lp_pct               = lp_valor / F
 
 # ④ Lucro Presumido c/ aproveitamento IBS/CBS
-lp_credito_valor     = lp_valor - credito_despesa
+lp_ibs_cbs           = F * aliquota_lucro_presumido_ibs_cbs    # F * 27%
+lp_credito_valor     = lp_valor + lp_ibs_cbs - credito_despesa
 lp_credito_pct       = lp_credito_valor / F
 
 # Custo total (imposto + honorário) por regime
@@ -149,7 +151,8 @@ Parâmetros padrão da seção 4. Resultado esperado:
 |---|---|---|
 | SN Padrão | 2.110,71 | 8,21% |
 | SN Híbrido | 3.381,85 | 13,15% |
-| LP c/ crédito IBS/CBS | 3.446,15 | 13,40% |
-| LP puro | 4.256,15 | 16,55% |
+| LP puro | 3.428,06 | 13,33% |
+| LP c/ crédito IBS/CBS | 9.561,62 | 37,18% |
 
-(Crédito da despesa = 3.000 × 27% = 810,00; Híbrido bruto = 25.716,90 × 16,3% = 4.191,85.)
+(Crédito da despesa = 3.000 × 27% = 810,00; Híbrido bruto = 25.716,90 × 16,3% = 4.191,85;
+LP IBS/CBS = 25.716,90 × 27% = 6.943,56.)

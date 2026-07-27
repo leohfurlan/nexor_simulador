@@ -113,11 +113,14 @@ def calcular_lancamento(
     # ② SN Padrão (input manual na v1)
     padrao_valor = _centavos(das_padrao)
 
-    # ③ Lucro Presumido puro
+    # ③ Lucro Presumido puro (IRPJ+CSLL+PIS+COFINS+ISS de hoje, sem IBS/CBS)
     lp_valor = _centavos(F * params.aliquota_lucro_presumido)
 
-    # ④ Lucro Presumido c/ aproveitamento de IBS/CBS
-    lp_credito_valor = _centavos(lp_valor - credito_despesa)
+    # ④ Lucro Presumido c/ aproveitamento de IBS/CBS: soma o IBS/CBS do
+    # regime (alíquota própria, diferente do CBS/IBS "destacado" acima) e
+    # abate o crédito das despesas.
+    lp_ibs_cbs = _centavos(F * params.aliquota_lucro_presumido_ibs_cbs)
+    lp_credito_valor = _centavos(lp_valor + lp_ibs_cbs - credito_despesa)
 
     # ⑤ Lucro Real: IRPJ/CSLL sobre o lucro estimado (margem * F) + IBS/CBS
     # sobre a receita, líquidos do crédito das despesas. Só é significativo com

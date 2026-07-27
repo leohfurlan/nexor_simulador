@@ -36,7 +36,8 @@ class Parametros(Base):
     aliquota_ibs: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.08800"))
     aliquota_hibrido_total: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.16300"))
     aliquota_credito_despesa: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.27000"))
-    aliquota_lucro_presumido: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.16550"))
+    aliquota_lucro_presumido: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.13330"))
+    aliquota_lucro_presumido_ibs_cbs: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.27000"))
     aliquota_lucro_real_irpj_csll: Mapped[Decimal] = mapped_column(_ALIQ, default=Decimal("0.34000"))
 
     # Estimativa da carga atual (pré-reforma).
@@ -62,6 +63,7 @@ class Parametros(Base):
             aliquota_hibrido_total=self.aliquota_hibrido_total,
             aliquota_credito_despesa=self.aliquota_credito_despesa,
             aliquota_lucro_presumido=self.aliquota_lucro_presumido,
+            aliquota_lucro_presumido_ibs_cbs=self.aliquota_lucro_presumido_ibs_cbs,
             aliquota_lucro_real_irpj_csll=self.aliquota_lucro_real_irpj_csll,
             aliquota_pis=self.aliquota_pis,
             aliquota_cofins=self.aliquota_cofins,
