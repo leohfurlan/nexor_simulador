@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import asyncio
 import uuid
+from decimal import Decimal
 
+import sqlalchemy as sa
 from sqlalchemy import func, select
 
 from app.config import settings
@@ -41,10 +43,60 @@ _CATEGORIAS: list[tuple[str, str, bool, str | None]] = [
 ]
 
 
+def _scalar_default_sql(column: sa.Column) -> str | None:
+    """SQL literal do default Python da coluna, se for um valor escalar simples."""
+    default = column.default
+    if default is None or not getattr(default, "is_scalar", False):
+        return None
+    value = default.arg
+    if isinstance(value, Decimal):
+        return str(value)
+    if isinstance(value, bool):
+        return "1" if value else "0"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, str):
+        return "'" + value.replace("'", "''") + "'"
+    return None
+
+
+def _sync_missing_columns(sync_conn) -> None:
+    """Adiciona em bases já existentes as colunas que os models ganharam depois.
+
+    `create_all` só cria tabelas ausentes — nunca altera uma tabela que já
+    existe. Bases instaladas em máquinas de cliente (fora do fluxo Alembic)
+    ficam presas no schema de quando foram criadas; sem isso, uma alíquota
+    nova (ex.: `aliquota_lucro_presumido_ibs_cbs`) quebra com "no such column"
+    até alguém apagar e recriar o banco manualmente — perdendo os dados.
+    Só faz ADD COLUMN; nunca remove/renomeia nem toca em linhas existentes
+    além de aplicar o default na coluna nova.
+    """
+    inspector = sa.inspect(sync_conn)
+    tabelas_existentes = set(inspector.get_table_names())
+    for tabela in Base.metadata.sorted_tables:
+        if tabela.name not in tabelas_existentes:
+            continue  # tabela nova inteira: create_all já resolve
+        colunas_existentes = {c["name"] for c in inspector.get_columns(tabela.name)}
+        for coluna in tabela.columns:
+            if coluna.name in colunas_existentes:
+                continue
+            tipo_sql = coluna.type.compile(dialect=sync_conn.dialect)
+            ddl = f"ALTER TABLE {tabela.name} ADD COLUMN {coluna.name} {tipo_sql}"
+            if not coluna.nullable:
+                default_sql = _scalar_default_sql(coluna)
+                if default_sql is None:
+                    # Sem default conhecido para preencher as linhas existentes:
+                    # melhor pular e deixar visível nos logs do que travar o boot.
+                    continue
+                ddl += f" NOT NULL DEFAULT {default_sql}"
+            sync_conn.execute(sa.text(ddl))
+
+
 async def init_models() -> None:
-    """Cria as tabelas (dev). Em produção o schema vem do Alembic."""
+    """Cria as tabelas (dev) e adiciona colunas novas em tabelas já existentes."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(_sync_missing_columns)
 
 
 async def seed_categorias(session) -> int:
