@@ -7,6 +7,7 @@ from decimal import Decimal
 from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.calc.engine import REDUCOES_IBS_CBS
 from app.models import Empresa, LancamentoMensal, Parametros
 from app.utils.numbers import parse_optional_decimal_br
 
@@ -15,6 +16,12 @@ def _margem_para_fracao(valor: object) -> Decimal | None:
     """Margem em PERCENTUAL ('20' ou '20,5') → fração (0.205). Vazio → None."""
     pct = parse_optional_decimal_br(valor)
     return None if pct is None else pct / Decimal("100")
+
+
+def _reducao_valida(valor: object) -> str | None:
+    """Aceita só as chaves conhecidas de redução de IBS/CBS; resto vira None."""
+    chave = (str(valor or "")).strip()
+    return chave if chave in REDUCOES_IBS_CBS else None
 
 
 async def list_empresas(session: AsyncSession, tenant_id: uuid.UUID, query: str = ""):
@@ -46,6 +53,7 @@ async def create_empresa(
     margem_lucro_estimada: object = None,
     setor: str | None = None,
     uf: str | None = None,
+    reducao_ibs_cbs: object = None,
 ) -> Empresa:
     empresa = Empresa(
         tenant_id=tenant_id,
@@ -57,6 +65,7 @@ async def create_empresa(
         margem_lucro_estimada=_margem_para_fracao(margem_lucro_estimada),
         setor=(setor or "").strip() or None,
         uf=((uf or "").strip().upper() or None),
+        reducao_ibs_cbs=_reducao_valida(reducao_ibs_cbs),
     )
     session.add(empresa)
     await session.commit()
@@ -77,6 +86,7 @@ async def update_empresa(
     margem_lucro_estimada: object = None,
     setor: str | None = None,
     uf: str | None = None,
+    reducao_ibs_cbs: object = None,
 ) -> Empresa | None:
     empresa = await get_empresa(session, tenant_id, empresa_id)
     if empresa is None:
@@ -89,6 +99,7 @@ async def update_empresa(
     empresa.margem_lucro_estimada = _margem_para_fracao(margem_lucro_estimada)
     empresa.setor = (setor or "").strip() or None
     empresa.uf = (uf or "").strip().upper() or None
+    empresa.reducao_ibs_cbs = _reducao_valida(reducao_ibs_cbs)
     await session.commit()
     await session.refresh(empresa)
     return empresa

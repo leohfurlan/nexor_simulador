@@ -67,16 +67,27 @@ Popular `CategoriaDespesa` com: Matérias-Primas e Insumos (Sim), Bens de Capita
 Dado `F` = faturamento, `D` = despesas com crédito:
 
 ```
-# Créditos gerados pelas despesas
+# Redução de alíquota de IBS/CBS (LC 214/2025), por empresa — opt-in no cadastro
+#   "regulamentada"   → 30% (art. 127: contador, advogado, engenheiro, arquiteto…)
+#   "saude_educacao"  → 60% (arts. 128/129)
+# Vale só no REGIME REGULAR de IBS/CBS: SN Híbrido, LP c/ crédito e Lucro Real.
+# O SN Padrão recolhe o IBS/CBS dentro do DAS e NÃO aproveita a redução.
+fator                = 1 - reducao_ibs_cbs                     # ex.: 0,70
+
+# Créditos gerados pelas despesas — integrais (o fornecedor cobrou cheio)
 credito_despesa      = D * aliquota_credito_despesa            # ex: D * 27%
 
 # Informativo (destaque na nota)
-cbs                  = F * aliquota_cbs                         # F * 2,7%
-ibs                  = F * aliquota_ibs                         # F * 8,8%
+cbs                  = F * aliquota_cbs * fator                 # F * 2,7%
+ibs                  = F * aliquota_ibs * fator                 # F * 8,8%
 total_ibs_cbs        = cbs + ibs
 
-# ① SN Híbrido
-hibrido_bruto        = F * aliquota_hibrido_total              # F * 16,3%
+# ① SN Híbrido — a alíquota total (16,3%) embute a parcela de IBS/CBS apurada no
+# regime regular (2,7% + 8,8% = 11,5%) e o resíduo do Simples (4,8%, segue no DAS).
+# A redução incide apenas sobre a primeira parcela.
+aliq_ibs_cbs_hibrido = aliquota_cbs + aliquota_ibs             # 11,5%
+residual_hibrido     = aliquota_hibrido_total - aliq_ibs_cbs_hibrido   # 4,8%
+hibrido_bruto        = F * (aliq_ibs_cbs_hibrido * fator + residual_hibrido)
 hibrido_liquido      = hibrido_bruto - credito_despesa
 hibrido_pct          = hibrido_liquido / F
 
@@ -89,7 +100,7 @@ lp_valor             = F * aliquota_lucro_presumido            # F * 13,33%
 lp_pct               = lp_valor / F
 
 # ④ Lucro Presumido c/ aproveitamento IBS/CBS
-lp_ibs_cbs           = F * aliquota_lucro_presumido_ibs_cbs    # F * 27%
+lp_ibs_cbs           = F * aliquota_lucro_presumido_ibs_cbs * fator   # F * 27%
 lp_credito_valor     = lp_valor + lp_ibs_cbs - credito_despesa
 lp_credito_pct       = lp_credito_valor / F
 

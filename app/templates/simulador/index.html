@@ -34,6 +34,14 @@
         {% for chave, rotulo in regimes %}<option value="{{ chave }}">{{ rotulo }}</option>{% endfor %}
       </select>
     </label>
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Redução de IBS/CBS (LC 214/2025)</span>
+      <span class="block text-xs text-slate-400">Vale no regime regular (Híbrido, LP c/ crédito e Real); o Simples Padrão não aproveita.</span>
+      <select name="reducao_ibs_cbs" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
+        <option value="">— sem redução —</option>
+        {% for chave, rotulo in reducoes %}<option value="{{ chave }}">{{ rotulo }}</option>{% endfor %}
+      </select>
+    </label>
     <div class="grid grid-cols-2 gap-4">
       <label class="block">
         <span class="text-sm font-medium text-slate-700">Faturamento mensal</span>

@@ -94,6 +94,35 @@ def test_fluxo_empresa_e_lancamentos():
         assert r.headers["location"] == "/empresas"
 
 
+def test_reducao_ibs_cbs_persiste_e_barateia_o_hibrido():
+    """Profissão regulamentada: -30% de IBS/CBS no Híbrido, DAS do Padrão intacto."""
+    with TestClient(app) as client:
+        url = _criar_empresa(client, nome="Contabilidade Teste")
+        lanc = {
+            "competencia": "2026-01",
+            "faturamento": "25716,90",
+            "despesas_com_credito": "3000,00",
+            "das_padrao_apurado": "2110,71",
+        }
+        r = client.post(f"{url}/lancamentos", data=lanc)
+        assert "3.381,85" in r.text   # Híbrido sem redução
+
+        r = client.post(
+            f"{url}/editar",
+            data={"nome": "Contabilidade Teste", "reducao_ibs_cbs": "regulamentada"},
+            follow_redirects=False,
+        )
+        assert r.status_code == 303
+
+        r = client.get(url)
+        assert "profissão regulamentada" in r.text  # badge de auditoria
+        # Híbrido cai: 25.716,90 * (11,5%*0,7 + 4,8%) - 810,00 = 2.494,62
+        assert "2.494,62" in r.text
+        assert "2.110,71" in r.text   # SN Padrão inalterado
+
+        client.post(f"{url}/excluir", follow_redirects=False)
+
+
 def test_criar_empresa_sem_nome_retorna_400():
     with TestClient(app) as client:
         r = client.post("/empresas", data={"nome": "  "}, follow_redirects=False)

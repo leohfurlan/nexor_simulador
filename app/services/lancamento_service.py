@@ -151,14 +151,15 @@ async def delete_lancamento(
 
 
 def _row_view(
-    lanc: LancamentoMensal, calc_params, exige_credito_cliente: bool, margem=None
+    lanc: LancamentoMensal, calc_params, exige_credito_cliente: bool, margem=None,
+    reducao_ibs_cbs: str | None = None,
 ) -> dict:
     """Calcula uma linha e monta a estrutura consumida pelo template."""
     das_informado = lanc.das_padrao_apurado is not None
     margem_informada = margem is not None
     calc = calcular_lancamento(
         lanc.faturamento, lanc.despesas_com_credito, lanc.das_padrao_apurado,
-        calc_params, margem=margem,
+        calc_params, margem=margem, reducao_ibs_cbs=reducao_ibs_cbs,
     )
     # Regimes indisponíveis por falta de dado: SN Padrão sem DAS, Lucro Real sem
     # margem de lucro informada.
@@ -211,7 +212,8 @@ async def compute_rows(
     lancs = await list_lancamentos(session, tenant_id, empresa.id)
     return [
         _row_view(lanc, calc_params, empresa.exige_credito_cliente,
-                  margem=empresa.margem_lucro_estimada)
+                  margem=empresa.margem_lucro_estimada,
+                  reducao_ibs_cbs=empresa.reducao_ibs_cbs)
         for lanc in lancs
     ]
 

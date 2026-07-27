@@ -39,6 +39,10 @@ class Empresa(Base):
     margem_lucro_estimada: Mapped[Decimal | None] = mapped_column(
         Numeric(6, 5), nullable=True
     )
+    # Redução de alíquota de IBS/CBS da LC 214/2025 ("regulamentada" = 30%,
+    # "saude_educacao" = 60%). Opt-in: o enquadramento na lista taxativa é
+    # responsabilidade do contador. Vazio/None = sem redução.
+    reducao_ibs_cbs: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

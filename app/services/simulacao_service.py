@@ -39,6 +39,7 @@ def simular_rapida(
     uf: str | None = None,
     regime_atual: str | None = None,
     exige_credito_cliente: bool = False,
+    reducao_ibs_cbs: str | None = None,
 ) -> dict:
     """Calcula os regimes para uma simulação avulsa e monta o contexto do painel."""
     F = parse_money_default_zero(faturamento)
@@ -46,7 +47,9 @@ def simular_rapida(
     das = parse_optional_decimal_br(das_padrao_apurado)
     margem = _margem_fracao(margem_pct)
 
-    calc = calcular_lancamento(F, D, das, calc_params, margem=margem)
+    calc = calcular_lancamento(
+        F, D, das, calc_params, margem=margem, reducao_ibs_cbs=reducao_ibs_cbs
+    )
 
     # Regimes indisponíveis por falta de dado (mesma regra do dashboard).
     excluir = set()
@@ -127,5 +130,7 @@ def simular_rapida(
         "carga_atual": carga_atual,
         "faturamento": F,
         "regime_atual": regime_atual,
+        "reducao_ibs_cbs": reducao_ibs_cbs or "",
+        "reducao_pct": calc.reducao_ibs_cbs,
         "tem_dados": F > 0,
     }

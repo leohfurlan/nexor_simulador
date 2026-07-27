@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.calc.carga_atual import SETORES
-from app.calc.engine import NOMES_REGIME
+from app.calc.engine import NOMES_REDUCAO, NOMES_REGIME
 from app.calc.tributos_uf import UFS
 from app.database import get_async_session
 from app.deps import get_tenant_id
@@ -25,10 +25,12 @@ router = APIRouter(prefix="/simular", tags=["simulador"])
 REGIMES = list(NOMES_REGIME.items())
 SETOR_OPCOES = list(SETORES.items())
 UF_OPCOES = list(UFS)
+REDUCAO_OPCOES = list(NOMES_REDUCAO.items())
 
 
 def _form_ctx() -> dict:
-    return {"regimes": REGIMES, "setores": SETOR_OPCOES, "ufs": UF_OPCOES}
+    return {"regimes": REGIMES, "setores": SETOR_OPCOES, "ufs": UF_OPCOES,
+            "reducoes": REDUCAO_OPCOES}
 
 
 @router.get("", response_class=HTMLResponse)
@@ -48,6 +50,7 @@ async def calcular(
     setor: str = Form(""),
     uf: str = Form(""),
     regime_atual: str = Form(""),
+    reducao_ibs_cbs: str = Form(""),
     exige_credito_cliente: str | None = Form(None),
     tenant_id: uuid.UUID = Depends(get_tenant_id),
     session: AsyncSession = Depends(get_async_session),
@@ -63,6 +66,7 @@ async def calcular(
             setor=setor or None,
             uf=uf or None,
             regime_atual=regime_atual or None,
+            reducao_ibs_cbs=reducao_ibs_cbs or None,
             exige_credito_cliente=exige_credito_cliente is not None,
         )
     except ValueError:

@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.calc.carga_atual import SETORES
-from app.calc.engine import NOMES_REGIME
+from app.calc.engine import NOMES_REDUCAO, NOMES_REGIME
 from app.calc.tributos_uf import UFS
 from app.database import get_async_session
 from app.deps import get_tenant_id
@@ -26,6 +26,8 @@ REGIMES = list(NOMES_REGIME.items())
 # Setores e UFs para os seletores do cadastro.
 SETOR_OPCOES = list(SETORES.items())
 UF_OPCOES = list(UFS)
+# Reduções de IBS/CBS da LC 214/2025 selecionáveis no cadastro (opt-in).
+REDUCAO_OPCOES = list(NOMES_REDUCAO.items())
 
 
 @router.get("", response_class=HTMLResponse)
@@ -37,7 +39,7 @@ async def listar(
 ):
     empresas = await empresa_service.list_empresas(session, tenant_id, q)
     ctx = {"empresas": empresas, "q": q, "active": "empresas", "regimes": REGIMES,
-           "setores": SETOR_OPCOES, "ufs": UF_OPCOES}
+           "setores": SETOR_OPCOES, "ufs": UF_OPCOES, "reducoes": REDUCAO_OPCOES}
     if request.headers.get("HX-Request") and not request.headers.get("HX-Boosted"):
         return templates.TemplateResponse(request, "empresas/partials/list_items.html", ctx)
     return templates.TemplateResponse(request, "empresas/list.html", ctx)
@@ -54,6 +56,7 @@ async def criar(
     margem_lucro_estimada: str = Form(""),
     setor: str = Form(""),
     uf: str = Form(""),
+    reducao_ibs_cbs: str = Form(""),
     tenant_id: uuid.UUID = Depends(get_tenant_id),
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -63,7 +66,7 @@ async def criar(
             request,
             "empresas/list.html",
             {"empresas": empresas, "q": "", "active": "empresas", "regimes": REGIMES,
-             "setores": SETOR_OPCOES, "ufs": UF_OPCOES,
+             "setores": SETOR_OPCOES, "ufs": UF_OPCOES, "reducoes": REDUCAO_OPCOES,
              "erro": "Informe o nome da empresa."},
             status_code=400,
         )
@@ -73,7 +76,7 @@ async def criar(
         exige_credito_cliente=exige_credito_cliente is not None,
         regime_atual=regime_atual,
         margem_lucro_estimada=margem_lucro_estimada,
-        setor=setor, uf=uf,
+        setor=setor, uf=uf, reducao_ibs_cbs=reducao_ibs_cbs,
     )
     return RedirectResponse(url=f"/empresas/{empresa.id}", status_code=303)
 
@@ -93,7 +96,7 @@ async def detalhe(
         request,
         "empresas/detail.html",
         {"empresa": empresa, "rows": rows, "active": "empresas", "regimes": REGIMES,
-         "setores": SETOR_OPCOES, "ufs": UF_OPCOES},
+         "setores": SETOR_OPCOES, "ufs": UF_OPCOES, "reducoes": REDUCAO_OPCOES},
     )
 
 
@@ -108,6 +111,7 @@ async def editar(
     margem_lucro_estimada: str = Form(""),
     setor: str = Form(""),
     uf: str = Form(""),
+    reducao_ibs_cbs: str = Form(""),
     tenant_id: uuid.UUID = Depends(get_tenant_id),
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -117,7 +121,7 @@ async def editar(
         exige_credito_cliente=exige_credito_cliente is not None,
         regime_atual=regime_atual,
         margem_lucro_estimada=margem_lucro_estimada,
-        setor=setor, uf=uf,
+        setor=setor, uf=uf, reducao_ibs_cbs=reducao_ibs_cbs,
     )
     return RedirectResponse(url=f"/empresas/{empresa_id}", status_code=303)
 

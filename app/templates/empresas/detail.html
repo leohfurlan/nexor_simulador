@@ -15,6 +15,11 @@
       {% if empresa.exige_credito_cliente %}
       <span class="ml-1 rounded bg-amber-50 px-1.5 py-0.5 text-xs text-amber-700">exige crédito de IBS/CBS</span>
       {% endif %}
+      {% if empresa.reducao_ibs_cbs %}
+      <span class="ml-1 rounded bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700">
+        {{ 'redução 30% — profissão regulamentada (art. 127)' if empresa.reducao_ibs_cbs == 'regulamentada' else 'redução 60% — saúde/educação (arts. 128-129)' }}
+      </span>
+      {% endif %}
     </p>
   </div>
 </header>
@@ -67,6 +72,16 @@
                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900" />
         <span class="ml-2 text-sm text-slate-400">%</span>
       </div>
+    </label>
+    <label class="block sm:col-span-2">
+      <span class="text-sm font-medium text-slate-700">Redução de IBS/CBS (LC 214/2025)</span>
+      <span class="block text-xs text-slate-400">Só se aplica a quem apura IBS/CBS no regime regular: Híbrido, Lucro Presumido c/ crédito e Lucro Real — nunca ao Simples Padrão.</span>
+      <select name="reducao_ibs_cbs" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900">
+        <option value="">— sem redução —</option>
+        {% for chave, rotulo in reducoes %}
+        <option value="{{ chave }}" {{ 'selected' if empresa.reducao_ibs_cbs == chave else '' }}>{{ rotulo }}</option>
+        {% endfor %}
+      </select>
     </label>
     <label class="flex items-center gap-2 sm:col-span-2">
       <input type="checkbox" name="exige_credito_cliente" value="1" {{ 'checked' if empresa.exige_credito_cliente else '' }} class="h-4 w-4 rounded border-slate-300" />
