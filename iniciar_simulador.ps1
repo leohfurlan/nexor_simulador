@@ -42,18 +42,27 @@ function Test-GitRepository([string]$Directory) {
     }
 
     # Evita chamar o Git para pastas .git vazias ou incompletas, como pode
-    # acontecer em pacotes copiados fora de um clone real.
-    $gitMarker = Join-Path $Directory ".git"
-    if (-not (Test-Path -LiteralPath $gitMarker)) {
-        return $false
-    }
-    if ((Get-Item -LiteralPath $gitMarker).PSIsContainer -and
-        -not (Test-Path -LiteralPath (Join-Path $gitMarker "HEAD"))) {
-        return $false
-    }
+    # acontecer em pacotes copiados fora de um clone real. Em pastas
+    # sincronizadas pelo OneDrive, o Test-Path acima pode enxergar o item
+    # (metadado em cache) enquanto o Get-Item abaixo falha ao resolvê-lo de
+    # verdade (placeholder ainda não baixado) — tratamos isso como "não é um
+    # repositório git utilizável" em vez de derrubar o inicializador inteiro.
+    try {
+        $gitMarker = Join-Path $Directory ".git"
+        if (-not (Test-Path -LiteralPath $gitMarker)) {
+            return $false
+        }
+        if ((Get-Item -LiteralPath $gitMarker).PSIsContainer -and
+            -not (Test-Path -LiteralPath (Join-Path $gitMarker "HEAD"))) {
+            return $false
+        }
 
-    & git.exe -C $Directory rev-parse --is-inside-work-tree *> $null
-    return $LASTEXITCODE -eq 0
+        & git.exe -C $Directory rev-parse --is-inside-work-tree *> $null
+        return $LASTEXITCODE -eq 0
+    }
+    catch {
+        return $false
+    }
 }
 
 function Test-GitRemote([string]$Directory) {
