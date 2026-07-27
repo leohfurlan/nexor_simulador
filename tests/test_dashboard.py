@@ -86,9 +86,35 @@ def test_dashboard_tem_repasse_pdf_e_copiar_resumo():
         assert "2033" in r.text and "Reforma plena" in r.text
 
 
+def test_recomendacao_ignora_regimes_de_referencia():
+    """Mesmo com o SN Padrão mais barato, o recomendado é um regime pós-Reforma."""
+    with TestClient(app) as client:
+        r = client.post(
+            "/empresas",
+            data={"nome": "Referencia Co", "regime_atual": "sn_padrao"},
+            follow_redirects=False,
+        )
+        url = r.headers["location"]
+        client.post(
+            f"{url}/lancamentos",
+            data={"competencia": "2026-01", "faturamento": "25716,90",
+                  "despesas_com_credito": "3000,00", "das_padrao_apurado": "2110,71"},
+        )
+        eid = url.rsplit("/", 1)[1]
+
+        r = client.get(f"/dashboard/{eid}")
+        assert r.status_code == 200
+        # O SN Padrão continua na comparação, mas rotulado como referência.
+        assert "REFERÊNCIA" in r.text
+        assert "Simples Nacional Híbrido" in r.text
+        # O card de recomendação não aponta para o SN Padrão.
+        recomendado = r.text.split("Regime recomendado", 1)[1][:400]
+        assert "Simples Nacional Padrão" not in recomendado
+
+
 def test_repasse_usa_margem_de_lucro_estimada():
-    """Com margem cadastrada, o repasse projeta a margem sem repasse. Regime
-    recomendado (SN Padrão) reduz a carga → margem projetada sobe."""
+    """Com margem cadastrada, o repasse projeta a margem sem repasse. Saindo do
+    LP puro para o recomendado (SN Híbrido) a carga cai → margem projetada sobe."""
     with TestClient(app) as client:
         r = client.post(
             "/empresas",
@@ -114,8 +140,8 @@ def test_repasse_usa_margem_de_lucro_estimada():
         r = client.get(f"/dashboard/{eid}")
         assert r.status_code == 200
         assert "Margem estimada" in r.text
-        # 20% + queda de carga (~5,13pp) → ~25,13% sem repasse.
-        assert "20,00%" in r.text and "25,13%" in r.text
+        # 20% + queda de carga (~0,22pp) → ~20,22% sem repasse.
+        assert "20,00%" in r.text and "20,22%" in r.text
         assert "para ver o impacto na margem" not in r.text
         # Com margem, o Lucro Real passa a ser comparável (card presente).
         assert "Lucro Real" in r.text

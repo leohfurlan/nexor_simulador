@@ -16,6 +16,7 @@ from app.calc.engine import (
     LP_PURO,
     LP_REAL,
     NOMES_REGIME,
+    REGIMES_RECOMENDAVEIS,
     SN_HIBRIDO,
     SN_PADRAO,
 )
@@ -205,12 +206,16 @@ async def build_dashboard(
             "custo_total": imposto_total + honorario_total,
             "pct_medio": (imposto_total / faturamento_total) if faturamento_total > 0 else None,
             "disponivel": disponivel,
+            "recomendavel": chave in REGIMES_RECOMENDAVEIS,
         }
 
-    # Recomendação sobre o acumulado (PRD seção 7).
-    candidatos = [c for c in REGIME_ORDER if agg[c]["disponivel"]]
-    if empresa.exige_credito_cliente:
-        candidatos = [c for c in candidatos if c != SN_PADRAO]
+    # Recomendação sobre o acumulado (PRD seção 7): só disputam os regimes que
+    # apuram IBS/CBS no regime regular. SN Padrão e LP puro ficam no comparativo
+    # apenas como referência de "quanto era".
+    candidatos = [
+        c for c in REGIME_ORDER
+        if c in REGIMES_RECOMENDAVEIS and agg[c]["disponivel"]
+    ]
     recomendado = (
         min(candidatos, key=lambda c: agg[c]["custo_total"]) if candidatos and n else None
     )

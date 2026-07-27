@@ -112,8 +112,9 @@ custo_total_regime   = imposto_regime + honorario_regime
 ## 7. Lógica de recomendação
 Calcular por período (mês e acumulado):
 
-1. **Menor custo total** = `min(imposto + honorário)` de cada regime.
-2. **Regra de competitividade:** se `empresa.exige_credito_cliente = true`, **desqualificar o SN Padrão** (o cliente não aproveita crédito de IBS/CBS) e recomendar entre os regimes que permitem repasse de crédito (Híbrido, LP c/ crédito).
+0. **Candidatos elegíveis:** só concorrem os regimes que apuram IBS/CBS no regime regular — **SN Híbrido, LP c/ crédito e Lucro Real**. O **SN Padrão** e o **LP puro** permanecem no comparativo apenas como referência de "quanto era × quanto vai ser" e **nunca são recomendados**, mesmo quando saem mais baratos.
+1. **Menor custo total** = `min(imposto + honorário)` entre os candidatos elegíveis.
+2. **Regra de competitividade:** todos os candidatos elegíveis repassam crédito de IBS/CBS; quando `empresa.exige_credito_cliente = true`, a justificativa explicita esse repasse.
 3. Exibir o regime recomendado + justificativa em linguagem simples (ex.: *"SN Híbrido: R$ X/mês em impostos. Apesar de não ser o menor imposto, permite que seu cliente aproveite o crédito, mantendo você competitivo."*).
 4. Mostrar a **economia anual** vs. o regime atual da empresa.
 

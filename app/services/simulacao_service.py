@@ -9,7 +9,13 @@ from __future__ import annotations
 from decimal import Decimal
 
 from app.calc.carga_atual import SETORES, calcular_carga_atual
-from app.calc.engine import LP_REAL, NOMES_REGIME, SN_PADRAO, calcular_lancamento
+from app.calc.engine import (
+    LP_REAL,
+    NOMES_REGIME,
+    REGIMES_RECOMENDAVEIS,
+    SN_PADRAO,
+    calcular_lancamento,
+)
 from app.calc.recommend import recomendar
 from app.services.dashboard_service import REGIME_CORES, REGIME_ORDER
 from app.utils.numbers import parse_money_default_zero, parse_optional_decimal_br
@@ -74,6 +80,7 @@ def simular_rapida(
             "custo_total": r.imposto + honorario,
             "pct": r.pct_efetivo,
             "disponivel": _disponivel(chave),
+            "recomendavel": chave in REGIMES_RECOMENDAVEIS,
         })
     por_chave = {c["chave"]: c for c in cards}
 

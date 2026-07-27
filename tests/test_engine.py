@@ -137,17 +137,24 @@ def test_sem_reducao_mantem_o_calculo_anterior():
 # --- Recomendação (PRD seção 7) ----------------------------------------------
 
 def test_recomendacao_menor_custo_total():
-    # custo total: padrão 2.460,71 | híbrido 3.931,85 | lp 4.178,06 | lp_cred 10.311,62
+    # Só disputam os regimes pós-Reforma: híbrido 3.931,85 | lp_cred 10.311,62.
     # Lucro Real fora: o caso de referência não informa margem.
     rec = recomendar(_resultado_ref(), exige_credito_cliente=False, excluir={LP_REAL})
-    assert rec.regime.chave == SN_PADRAO
+    assert rec.regime.chave == SN_HIBRIDO
 
 
-def test_recomendacao_desqualifica_sn_padrao_quando_exige_credito():
-    # Sem margem, o Lucro Real não é candidato (excluído como no app).
+def test_regimes_de_referencia_nunca_sao_recomendados():
+    """SN Padrão e LP puro são só 'quanto era' — mesmo sendo os mais baratos."""
+    r = _resultado_ref()
+    # No caso de referência o SN Padrão é o mais barato de todos...
+    assert r.regimes[SN_PADRAO].custo_total < r.regimes[SN_HIBRIDO].custo_total
+    assert r.regimes[LP_PURO].custo_total < r.regimes[LP_CREDITO].custo_total
+    # ...e ainda assim não é sugerido como destino.
+    rec = recomendar(r, exige_credito_cliente=False, excluir={LP_REAL})
+    assert rec.regime.chave in (SN_HIBRIDO, LP_CREDITO, LP_REAL)
+
+
+def test_justificativa_menciona_repasse_de_credito_no_b2b():
     rec = recomendar(_resultado_ref(), exige_credito_cliente=True, excluir={LP_REAL})
-    assert SN_PADRAO in rec.desqualificados
-    assert rec.regime.chave != SN_PADRAO
-    # entre os que repassam crédito, o menor custo total é o SN Híbrido
     assert rec.regime.chave == SN_HIBRIDO
     assert "competitivo" in rec.justificativa

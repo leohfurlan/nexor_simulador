@@ -31,6 +31,14 @@ NOMES_REGIME = {
     LP_REAL: "Lucro Real",
 }
 
+# Regimes que podem ser RECOMENDADOS: só os que apuram IBS/CBS no regime
+# regular, ou seja, os que existirão de fato depois da Reforma. O SN Padrão e o
+# Lucro Presumido puro permanecem no comparativo apenas como referência de
+# "quanto era" — nunca são sugeridos como destino.
+REGIMES_RECOMENDAVEIS = (SN_HIBRIDO, LP_CREDITO, LP_REAL)
+# Regimes exibidos só para comparação com a situação atual.
+REGIMES_REFERENCIA = (SN_PADRAO, LP_PURO)
+
 # --- Reduções de alíquota de IBS/CBS (LC 214/2025) ---------------------------
 # Só valem para quem apura IBS/CBS no REGIME REGULAR: SN Híbrido, Lucro
 # Presumido c/ crédito e Lucro Real. O SN Padrão recolhe tudo dentro do DAS e

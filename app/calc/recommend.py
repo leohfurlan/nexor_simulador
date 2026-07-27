@@ -1,15 +1,18 @@
 """Lógica de recomendação do regime ótimo (PRD seção 7).
 
-Combina menor custo total (imposto + honorário) com a regra de competitividade:
-se o cliente da empresa exige crédito de IBS/CBS (B2B), o SN Padrão é
-desqualificado porque não permite o repasse do crédito.
+Só concorrem à recomendação os regimes que apuram IBS/CBS no regime regular
+(SN Híbrido, LP c/ crédito e Lucro Real) — os regimes de referência entram no
+comparativo apenas para mostrar "quanto era". Entre os candidatos, vence o
+menor custo total (imposto + honorário), com a regra de competitividade: se o
+cliente da empresa exige crédito de IBS/CBS (B2B), quem não repassa crédito é
+desqualificado.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
 
-from .engine import ResultadoCalculo, ResultadoRegime, SN_PADRAO
+from .engine import REGIMES_RECOMENDAVEIS, ResultadoCalculo, ResultadoRegime
 
 
 @dataclass(frozen=True)
@@ -24,20 +27,20 @@ def recomendar(
     exige_credito_cliente: bool = False,
     excluir: set[str] | None = None,
 ) -> Recomendacao:
-    candidatos = dict(resultado.regimes)
+    # Só os regimes pós-Reforma disputam a recomendação; SN Padrão e LP puro
+    # ficam de fora por construção (são referência de "quanto era").
+    candidatos = {
+        chave: regime
+        for chave, regime in resultado.regimes.items()
+        if chave in REGIMES_RECOMENDAVEIS
+    }
     desqualificados: list[str] = []
 
-    # Regimes indisponíveis (ex.: SN Padrão sem DAS informado no mês).
+    # Regimes indisponíveis (ex.: Lucro Real sem margem informada).
     for chave in excluir or ():
         if chave in candidatos:
             del candidatos[chave]
             desqualificados.append(chave)
-
-    # Regra de competitividade (PRD 7.2): sem repasse de crédito, o SN Padrão
-    # não serve para clientes B2B que exigem crédito.
-    if exige_credito_cliente and SN_PADRAO in candidatos:
-        del candidatos[SN_PADRAO]
-        desqualificados.append(SN_PADRAO)
 
     escolhido = min(candidatos.values(), key=lambda r: r.custo_total)
     justificativa = _justificar(escolhido, exige_credito_cliente)
@@ -69,8 +72,8 @@ def _justificar(escolhido: ResultadoRegime, exige_credito_cliente: bool) -> str:
     )
     if exige_credito_cliente:
         texto += (
-            " Como seu cliente exige crédito de IBS/CBS, o Simples Nacional Padrão "
-            "foi descartado por não permitir esse repasse — o regime sugerido "
-            "mantém você competitivo."
+            " Como seu cliente exige crédito de IBS/CBS, o regime sugerido "
+            "mantém você competitivo: ele apura IBS/CBS no regime regular e "
+            "repassa o crédito integral ao cliente."
         )
     return texto

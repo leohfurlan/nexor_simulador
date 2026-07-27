@@ -2,20 +2,24 @@
 {% block title %}Simulação rápida · Nexor Simulador{% endblock %}
 
 {% block content %}
-<header class="mb-6">
-  <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Reforma Tributária · IBS/CBS</p>
-  <h1 class="mt-1 text-2xl font-semibold text-slate-900">Simulação rápida</h1>
-  <p class="mt-2 max-w-2xl text-sm text-slate-600">
-    Estime o impacto na hora, sem cadastrar a empresa. Preencha os campos e o
-    resultado é recalculado automaticamente. Para acompanhar mês a mês, use
-    <a href="/empresas" class="font-medium text-slate-900 underline">Empresas</a> e o
-    <a href="/dashboard" class="font-medium text-slate-900 underline">Dashboard</a>.
-  </p>
+<header class="mb-6 flex flex-wrap items-start justify-between gap-4">
+  <div>
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Reforma Tributária · IBS/CBS</p>
+    <h1 class="mt-1 text-2xl font-semibold text-slate-900">Simulação rápida</h1>
+    <p class="mt-2 max-w-2xl text-sm text-slate-600 print:hidden">
+      Estime o impacto na hora, sem cadastrar a empresa. Preencha os campos e o
+      resultado é recalculado automaticamente. Para acompanhar mês a mês, use
+      <a href="/empresas" class="font-medium text-slate-900 underline">Empresas</a> e o
+      <a href="/dashboard" class="font-medium text-slate-900 underline">Dashboard</a>.
+    </p>
+  </div>
+  <button type="button" onclick="window.print()"
+          class="rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 print:hidden">Gerar PDF</button>
 </header>
 
 {% include "partials/aviso_aliquotas.html" %}
 
-<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2 print:block">
   <!-- Coluna de inputs -->
   <form hx-post="/simular" hx-target="#resultado" hx-swap="innerHTML"
         hx-trigger="change, keyup changed delay:400ms"
